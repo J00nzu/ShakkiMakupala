@@ -1,0 +1,2 @@
+# ShakkiMakupala
+A chess bot.
