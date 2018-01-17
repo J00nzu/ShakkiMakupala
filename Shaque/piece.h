@@ -18,8 +18,25 @@
 
 enum PIECE : uint_fast8_t
 {
-	VT, VR, VL, VD, VK, VS,
-	MT, MR, ML, MD, MK, MS
+	WROOK = 0,	WKNIGHT, WBISHOP, WQUEEN, WKING, WPAWN,
+	BROOK,		BKNIGHT, BBISHOP, BQUEEN, BKING, BPAWN
+};
+
+Piece pieces[12] = 
+{
+	Piece(UCODE_WROOK,		WROOK,		WHITE), 
+	Piece(UCODE_WKNIGHT,	WKNIGHT,	WHITE),
+	Piece(UCODE_WBISHOP,	WBISHOP,	WHITE),
+	Piece(UCODE_WQUEEN,		WQUEEN,		WHITE),
+	Piece(UCODE_WKING,		WKING,		WHITE),
+	Piece(UCODE_WPAWN,		WPAWN,		WHITE),
+
+	Piece(UCODE_BROOK,		BROOK,		BLACK),
+	Piece(UCODE_BKNIGHT,	BKNIGHT,	BLACK),
+	Piece(UCODE_BBISHOP,	BBISHOP,	BLACK),
+	Piece(UCODE_BQUEEN,		BQUEEN,		BLACK),
+	Piece(UCODE_BKING,		BKING,		BLACK),
+	Piece(UCODE_BPAWN,		BPAWN,		BLACK)
 };
 
 enum COLOR : bool {
@@ -31,13 +48,13 @@ class Piece {
 
 private:
 	std::wstring _unicode;
-	COLOR _vari; // valkea = 0, musta = 1
-	uint_fast8_t _koodi; // VT, VR, MT tms.
+	COLOR _color; // valkea = 0, musta = 1
+	uint_fast8_t _code; // VT, VR, MT tms.
 public:
-	Piece(const std::wstring&, int, bool);
+	Piece(const std::wstring&, PIECE, COLOR);
 	Piece() {};
-	void setKoodi(uint_fast8_t);
-	uint_fast8_t getKoodi();
+	void setCode(PIECE);
+	PIECE getCode();
 	void setUnicode(const std::wstring&);
 	std::wstring getUnicode() const;
 	void setVari(COLOR);
