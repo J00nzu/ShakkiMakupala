@@ -1,23 +1,105 @@
 #pragma once
 #include "piece.h"
+#include "enums.h"
+#include "flagmanip.h"
 
-
-enum POSITION : uint_fast8_t {
-	A8 = 0, B8, C8, D8, E8, F8, G8, H8,
-	A7,		B7, C7, D7, E7, F7, G7, H7,
-	A6,		B6, C6, D6, E6, F6, G6, H6,
-	A5,		B5, C5, D5, E5, F5, G5, H5,
-	A4,		B4, C4, D4, E4, F4, G4, H4,
-	A3,		B3, C3, D3, E3, F3, G3, H3,
-	A2,		B2, C2, D2, E2, F2, G2, H2,
-	A1,		B1, C1, D1, E1, F1, G1, H1
-};
+#define STATE_H_TURN_WHITE				0b00000001
+#define STATE_H_WHITE_CASTLING_ALLOWED	0b00000010
+#define STATE_H_BLACK_CASTLING_ALLOWED	0b00000100
+#define STATE_H_WHITE_CHECKED			0b00001000
+#define STATE_H_BLACK_CHECKED			0b00010000
 
 class State {
 
 public:
+	PIECE board[8 * 8];
+	uint_least8_t flags;
+
 	State() {};
-	PIECE board[8*8];
-	const Piece getPiece(POSITION);
+	const Piece* getPiece(POSITION pos) const;
+	void setPiece(POSITION pos, PIECE piece);
 	static State initialize();
+	static State initializeEmpty();
+	static int getRank(POSITION);
+	static char getLetter(POSITION pos);
+
+	//flag manipulation
+	/*
+	void setTurnWhite();
+	void setTurnBlack();
+	COLOR getTurnColor();
+
+	void setWhiteCastlingAllowed();
+	void setBlackCastlingAllowed();
+	void setWhiteChecked();
+	void setBlackChecked();
+
+	void unSetWhiteCastlingAllowed();
+	void unSetBlackCastlingAllowed();
+	void unSetWhiteChecked();
+	void unSetBlackChecked();
+
+	bool getWhiteCastlingAllowed();
+	bool getBlackCastlingAllowed();
+	bool getWhiteChecked();
+	bool getBlackChecked();
+	*/
+
+	inline void State::setTurnWhite() {
+		SetFlag(flags, STATE_H_TURN_WHITE);
+	}
+	inline void State::setTurnBlack() {
+		UnsetFlag(flags, STATE_H_TURN_WHITE);
+	}
+	inline COLOR State::getTurnColor() {
+		if ((flags & STATE_H_TURN_WHITE) != 0) {
+			return WHITE;
+		}
+		else {
+			return BLACK;
+		}
+	}
+
+	inline void State::setWhiteCastlingAllowed() {
+		SetFlag(flags, STATE_H_WHITE_CASTLING_ALLOWED);
+	}
+	inline void State::setBlackCastlingAllowed() {
+		SetFlag(flags, STATE_H_BLACK_CASTLING_ALLOWED);
+	}
+	inline void State::setWhiteChecked() {
+		SetFlag(flags, STATE_H_WHITE_CHECKED);
+	}
+	inline void State::setBlackChecked() {
+		SetFlag(flags, STATE_H_BLACK_CHECKED);
+	}
+
+	inline void State::unSetWhiteCastlingAllowed() {
+		UnsetFlag(flags, STATE_H_WHITE_CASTLING_ALLOWED);
+	}
+	inline void State::unSetBlackCastlingAllowed() {
+		UnsetFlag(flags, STATE_H_BLACK_CASTLING_ALLOWED);
+	}
+	inline void State::unSetWhiteChecked() {
+		UnsetFlag(flags, STATE_H_WHITE_CHECKED);
+	}
+	inline void State::unSetBlackChecked() {
+		UnsetFlag(flags, STATE_H_BLACK_CHECKED);
+	}
+
+	inline bool State::getWhiteCastlingAllowed() {
+		return (flags & STATE_H_WHITE_CASTLING_ALLOWED) != 0;
+	}
+	inline bool State::getBlackCastlingAllowed() {
+		return (flags & STATE_H_BLACK_CASTLING_ALLOWED) != 0;
+	}
+	inline bool State::getWhiteChecked() {
+		return (flags & STATE_H_WHITE_CHECKED) != 0;
+	}
+	inline bool State::getBlackChecked() {
+		return (flags & STATE_H_BLACK_CHECKED) != 0;
+	}
+
+
 };
+
+

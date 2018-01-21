@@ -1,7 +1,24 @@
 #pragma once
 #include <string>
-#include <cstdint>
+#include <vector>
 
+#include "enums.h"
+#include "move.h"
+
+/*
+#define UCODE_WKING		L"K"
+#define UCODE_WQUEEN	L"Q"	
+#define UCODE_WROOK		L"R"	 
+#define UCODE_WBISHOP	L"B"	
+#define UCODE_WKNIGHT	L"K"	
+#define UCODE_WPAWN		L"P"
+#define UCODE_BKING		L"K"	
+#define UCODE_BQUEEN	L"Q"
+#define UCODE_BROOK		L"R"
+#define UCODE_BBISHOP	L"B"
+#define UCODE_BKNIGHT	L"K"
+#define UCODE_BPAWN		L"P"
+*/
 #define UCODE_WKING		L"\u2654"
 #define UCODE_WQUEEN	L"\u2655"	
 #define UCODE_WROOK		L"\u2656"	 
@@ -15,48 +32,67 @@
 #define UCODE_BKNIGHT	L"\u265E"
 #define UCODE_BPAWN		L"\u265F"
 
-
-enum PIECE : uint_fast8_t
-{
-	WROOK = 0,	WKNIGHT, WBISHOP, WQUEEN, WKING, WPAWN,
-	BROOK,		BKNIGHT, BBISHOP, BQUEEN, BKING, BPAWN
-};
-
-Piece pieces[12] = 
-{
-	Piece(UCODE_WROOK,		WROOK,		WHITE), 
-	Piece(UCODE_WKNIGHT,	WKNIGHT,	WHITE),
-	Piece(UCODE_WBISHOP,	WBISHOP,	WHITE),
-	Piece(UCODE_WQUEEN,		WQUEEN,		WHITE),
-	Piece(UCODE_WKING,		WKING,		WHITE),
-	Piece(UCODE_WPAWN,		WPAWN,		WHITE),
-
-	Piece(UCODE_BROOK,		BROOK,		BLACK),
-	Piece(UCODE_BKNIGHT,	BKNIGHT,	BLACK),
-	Piece(UCODE_BBISHOP,	BBISHOP,	BLACK),
-	Piece(UCODE_BQUEEN,		BQUEEN,		BLACK),
-	Piece(UCODE_BKING,		BKING,		BLACK),
-	Piece(UCODE_BPAWN,		BPAWN,		BLACK)
-};
-
-enum COLOR : bool {
-	WHITE = false,
-	BLACK = true
-};
+class State;
 
 class Piece {
 
-private:
+protected:
 	std::wstring _unicode;
 	COLOR _color; // valkea = 0, musta = 1
-	uint_fast8_t _code; // VT, VR, MT tms.
+	PIECE _code; // VT, VR, MT tms.
 public:
 	Piece(const std::wstring&, PIECE, COLOR);
 	Piece() {};
 	void setCode(PIECE);
-	PIECE getCode();
+	PIECE getCode() const;
 	void setUnicode(const std::wstring&);
 	std::wstring getUnicode() const;
-	void setVari(COLOR);
-	COLOR getVari() const;
+	void setColor(COLOR);
+	COLOR getColor() const;
+	virtual std::vector<PossibleMove> getPossibleMoves(const State& gameState, const Move& lastOpponentMove, POSITION pos) const = 0;
 };
+
+extern const Piece* pieces[12];
+
+class Rook : public Piece {
+public:
+	Rook(const std::wstring& unicode, PIECE code, COLOR color) : Piece(unicode, code, color) {};
+	Rook() {};
+	std::vector<PossibleMove> getPossibleMoves(const State&, const Move&, POSITION) const;
+};
+
+class Knight : public Piece {
+public:
+	Knight(const std::wstring& unicode, PIECE code, COLOR color) : Piece(unicode, code, color) {};
+	Knight() {};
+	std::vector<PossibleMove> getPossibleMoves(const State&, const Move&, POSITION) const;
+};
+
+class Bishop : public Piece {
+public:
+	Bishop(const std::wstring& unicode, PIECE code, COLOR color) : Piece(unicode, code, color) {};
+	Bishop() {};
+	std::vector<PossibleMove> getPossibleMoves(const State&, const Move&, POSITION) const;
+};
+
+class Queen : public Piece {
+public:
+	Queen(const std::wstring& unicode, PIECE code, COLOR color) : Piece(unicode, code, color) {};
+	Queen() {};
+	std::vector<PossibleMove> getPossibleMoves(const State&, const Move&, POSITION) const;
+};
+
+class King : public Piece {
+public:
+	King(const std::wstring& unicode, PIECE code, COLOR color) : Piece(unicode, code, color) {};
+	King() {};
+	std::vector<PossibleMove> getPossibleMoves(const State&, const Move&, POSITION) const;
+};
+
+class Pawn : public Piece {
+public:
+	Pawn(const std::wstring& unicode, PIECE code, COLOR color) : Piece(unicode, code, color) {};
+	Pawn() {};
+	std::vector<PossibleMove> getPossibleMoves(const State&, const Move&, POSITION) const;
+};
+
