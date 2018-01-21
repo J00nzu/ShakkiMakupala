@@ -1,6 +1,5 @@
 #include "state.h"
 #include "piece.h"
-#include "flagmanip.h"
 #include <math.h>
 
 const Piece* State::getPiece(POSITION pos) const{
@@ -59,12 +58,6 @@ State State::initialize() {
 	state.board[G2] = WPAWN;
 	state.board[H2] = WPAWN;
 
-	state.flags = 0; // clear any flags
-
-	state.setBlackCastlingAllowed();
-	state.setWhiteCastlingAllowed();
-	state.setTurnWhite();
-
 	return state;
 }
 State State::initializeEmpty() 
@@ -73,12 +66,6 @@ State State::initializeEmpty()
 	for each (PIECE &p in state.board) {
 		p = EMPTY;
 	}
-
-	state.flags = 0; // clear any flags
-
-	state.setBlackCastlingAllowed();
-	state.setWhiteCastlingAllowed();
-	state.setTurnWhite();
 
 	return state;
 }

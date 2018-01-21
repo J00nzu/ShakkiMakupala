@@ -1,8 +1,19 @@
 #include "piece.h"
 #include "state.h"
-#include "movegeneration.h"
-#include "movement.h"
 
+
+#define UCODE_WKING		L"\u2654"
+#define UCODE_WQUEEN	L"\u2655"	
+#define UCODE_WROOK		L"\u2656"	 
+#define UCODE_WBISHOP	L"\u2657"	
+#define UCODE_WKNIGHT	L"\u2658"	
+#define UCODE_WPAWN		L"\u2659"
+#define UCODE_BKING		L"\u265A"	
+#define UCODE_BQUEEN	L"\u265B"
+#define UCODE_BROOK		L"\u265C"
+#define UCODE_BBISHOP	L"\u265D"
+#define UCODE_BKNIGHT	L"\u265E"
+#define UCODE_BPAWN		L"\u265F"
 
 const Piece* pieces[12] =
 {
@@ -48,74 +59,4 @@ void Piece::setColor(COLOR color) {
 
 COLOR Piece::getColor() const {
 	return _color;
-}
-
-
-
-
-std::vector<PossibleMove> Rook::getPossibleMoves(const State& gameState, const Move& lastOpponentMove, POSITION pos) const {
-	std::vector<PossibleMove> moves;
-
-	movegeneration::moveOrCapture(moves, gameState, this, pos, DIRECTION::STRAIGHT, 0);
-
-	return moves;
-}
-
-std::vector<PossibleMove> Knight::getPossibleMoves(const State& gameState, const Move& lastOpponentMove, POSITION pos) const {
-	std::vector<PossibleMove> moves;
-
-	movegeneration::moveOrCapture(moves, gameState, this, pos, DIRECTION::KNIGHT, 0);
-
-	return moves;
-}
-
-std::vector<PossibleMove> Bishop::getPossibleMoves(const State& gameState, const Move& lastOpponentMove, POSITION pos) const {
-	std::vector<PossibleMove> moves;
-
-	movegeneration::moveOrCapture(moves, gameState, this, pos, DIRECTION::DIAGONAL, 0);
-
-	return moves;
-}
-
-std::vector<PossibleMove> Queen::getPossibleMoves(const State& gameState, const Move& lastOpponentMove, POSITION pos) const {
-	std::vector<PossibleMove> moves;
-
-	movegeneration::moveOrCapture(moves, gameState, this, pos, DIRECTION::ANY, 0);
-
-	return moves;
-}
-
-std::vector<PossibleMove> King::getPossibleMoves(const State& gameState, const Move& lastOpponentMove, POSITION pos) const {
-	std::vector<PossibleMove> moves;
-
-	movegeneration::moveOrCapture(moves, gameState, this, pos, DIRECTION::ANY, 1);
-
-	return moves;
-}
-
-std::vector<PossibleMove> Pawn::getPossibleMoves(const State& gameState, const Move& lastOpponentMove, POSITION pos) const {
-	std::vector<PossibleMove> moves;
-	int moveRange = 1;
-
-	COLOR color = this->_color;
-	
-	if (color == WHITE) {
-		if (gameState.getRank(pos) == 2) {
-			moveRange = 2;
-		}
-		movegeneration::move(moves, gameState, this, pos, DIRECTION::UP, moveRange);
-		uint_least16_t dirs = (uint_least16_t)DIRECTION::UPRIGHT | (uint_least16_t)DIRECTION::UPLEFT;
-		movegeneration::capture(moves, gameState, this, pos, dirs, 1);
-
-	}
-	else {
-		if (gameState.getRank(pos) == 7) {
-			moveRange = 2;
-		}
-		movegeneration::move(moves, gameState, this, pos, DIRECTION::DOWN, moveRange);
-		uint_least16_t dirs = (uint_least16_t)DIRECTION::DOWNRIGHT | (uint_least16_t)DIRECTION::DOWNLEFT;
-		movegeneration::capture(moves, gameState, this, pos, dirs, 1);
-	}
-
-	return moves;
 }

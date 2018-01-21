@@ -10,5 +10,4 @@ public:
 	State* getState();
 	void setState(State* state);
 	void drawBoard();
-	void drawBoard(POSITION selectedPiece, std::vector<PossibleMove> possibleMoves);
 };

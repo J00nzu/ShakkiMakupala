@@ -24,22 +24,7 @@
     <ClInclude Include="ui.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="move.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="flagmanip.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="enums.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="movement.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="coversion.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="movegeneration.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -54,15 +39,6 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="main.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="move.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="movegeneration.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="movement.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

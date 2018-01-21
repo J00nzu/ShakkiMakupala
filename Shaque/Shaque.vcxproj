@@ -142,21 +142,13 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="coversion.h" />
     <ClInclude Include="enums.h" />
-    <ClInclude Include="flagmanip.h" />
-    <ClInclude Include="move.h" />
-    <ClInclude Include="movegeneration.h" />
-    <ClInclude Include="movement.h" />
     <ClInclude Include="piece.h" />
     <ClInclude Include="state.h" />
     <ClInclude Include="ui.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="move.cpp" />
     <ClCompile Include="main.cpp" />
-    <ClCompile Include="movegeneration.cpp" />
-    <ClCompile Include="movement.cpp" />
     <ClCompile Include="piece.cpp" />
     <ClCompile Include="state.cpp" />
     <ClCompile Include="ui.cpp" />
