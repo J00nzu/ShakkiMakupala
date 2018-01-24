@@ -36,10 +36,16 @@
     <ClInclude Include="movement.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="coversion.h">
+    <ClInclude Include="movegeneration.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="movegeneration.h">
+    <ClInclude Include="game.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="player.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="conversion.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
@@ -63,6 +69,15 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="movement.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="player.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="game.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="conversion.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

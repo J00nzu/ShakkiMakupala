@@ -3,12 +3,8 @@
 #include <vector>
 
 class UI {
-	State* _state;
-
 public:
-	UI(State* state);
-	State* getState();
-	void setState(State* state);
-	void drawBoard();
-	void drawBoard(POSITION selectedPiece, std::vector<PossibleMove> possibleMoves);
+	UI();
+	void drawBoard(const State& state) const;
+	void drawBoard(const State& state, POSITION selectedPiece, std::vector<PossibleMove> possibleMoves) const;
 };

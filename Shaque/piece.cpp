@@ -89,6 +89,7 @@ std::vector<PossibleMove> King::getPossibleMoves(const State& gameState, const M
 	std::vector<PossibleMove> moves;
 
 	movegeneration::moveOrCapture(moves, gameState, this, pos, DIRECTION::ANY, 1);
+	movegeneration::checkCastling(moves, gameState, this, pos);
 
 	return moves;
 }
@@ -115,6 +116,11 @@ std::vector<PossibleMove> Pawn::getPossibleMoves(const State& gameState, const M
 		movegeneration::move(moves, gameState, this, pos, DIRECTION::DOWN, moveRange);
 		uint_least16_t dirs = (uint_least16_t)DIRECTION::DOWNRIGHT | (uint_least16_t)DIRECTION::DOWNLEFT;
 		movegeneration::capture(moves, gameState, this, pos, dirs, 1);
+	}
+
+	if (moveRange == 1) {
+		movegeneration::checkEnPassant(moves, gameState, lastOpponentMove, this, pos);
+		movegeneration::checkPromotionForPawnMoves(moves, this, pos);
 	}
 
 	return moves;

@@ -1,6 +1,7 @@
 #include "state.h"
 #include "piece.h"
 #include "flagmanip.h"
+#include "movement.h"
 #include <math.h>
 
 const Piece* State::getPiece(POSITION pos) const{
@@ -61,8 +62,12 @@ State State::initialize() {
 
 	state.flags = 0; // clear any flags
 
-	state.setBlackCastlingAllowed();
-	state.setWhiteCastlingAllowed();
+	state.setBlackShortCastlingAllowed();
+	state.setBlackLongCastlingAllowed();
+
+	state.setWhiteShortCastlingAllowed();
+	state.setWhiteLongCastlingAllowed();
+
 	state.setTurnWhite();
 
 	return state;
@@ -76,8 +81,12 @@ State State::initializeEmpty()
 
 	state.flags = 0; // clear any flags
 
-	state.setBlackCastlingAllowed();
-	state.setWhiteCastlingAllowed();
+	state.setBlackShortCastlingAllowed();
+	state.setBlackLongCastlingAllowed();
+
+	state.setWhiteShortCastlingAllowed();
+	state.setWhiteLongCastlingAllowed();
+
 	state.setTurnWhite();
 
 	return state;
@@ -95,4 +104,97 @@ char State::getLetter(POSITION pos) {
 	int rem = pos % 8;
 	return (char)(65 + rem);
 }
+
+
+void doCastling(const Move& move, const State* prevState, State& newState) {
+	if (move.getColor() == WHITE) {
+		if (move.getCastlingLong()) {
+			newState.board[E1] = EMPTY;
+			newState.board[A1] = EMPTY;
+			newState.board[C1] = WKING;
+			newState.board[D1] = WROOK;
+		}
+		else if (move.getCastlingShort()) {
+			newState.board[E1] = EMPTY;
+			newState.board[H1] = EMPTY;
+			newState.board[G1] = WKING;
+			newState.board[F1] = WROOK;
+		}
+		newState.unSetWhiteShortCastlingAllowed();
+		newState.unSetWhiteLongCastlingAllowed();
+	}else {
+		if (move.getCastlingLong()) {
+			newState.board[E8] = EMPTY;
+			newState.board[A8] = EMPTY;
+			newState.board[C8] = BKING;
+			newState.board[D8] = BROOK;
+		}
+		else if (move.getCastlingShort()) {
+			newState.board[E8] = EMPTY;
+			newState.board[H8] = EMPTY;
+			newState.board[G8] = BKING;
+			newState.board[F8] = BROOK;
+		}
+		newState.unSetBlackShortCastlingAllowed();
+		newState.unSetBlackLongCastlingAllowed();
+	}
+}
+
+void doEnPassant(const Move& move, const State* prevState, State& newState) {
+	if (move.getEnPassantRight()) {
+		POSITION markPos = movement::moveRight(move.startPos);
+		newState.board[markPos] = EMPTY;
+	}
+	else if (move.getEnPassantLeft()) {
+		POSITION markPos = movement::moveLeft(move.startPos);
+		newState.board[markPos] = EMPTY;
+	}
+}
+
+State State::advanceTurn(const Move& move) const {
+	State newState(*this);
+
+	if (getTurnColor() == WHITE) {
+		newState.setTurnBlack();
+	}
+	else {
+		newState.setTurnWhite();
+	}
+
+	newState.board[move.startPos] = EMPTY;
+	newState.board[move.endPos] = move.piece;
+
+	if (move.getPromotion()) {
+		newState.board[move.endPos] = move.promotedTo;
+	}else if (move.getCastlingLong() || move.getCastlingShort()) {
+		doCastling(move, this, newState);
+	}else if (move.getEnPassantLeft() || move.getEnPassantRight()) {
+		doEnPassant(move, this, newState);
+	}
+
+	const uint_least8_t castlingMask = STATE_H_WHITE_LONG_CASTLING_ALLOWED | STATE_H_WHITE_SHORT_CASTLING_ALLOWED | STATE_H_BLACK_LONG_CASTLING_ALLOWED | STATE_H_BLACK_SHORT_CASTLING_ALLOWED;
+
+	if((castlingMask & flags) != 0){ //if any castling is still possible
+		if (move.piece == WKING) {
+			newState.unSetWhiteLongCastlingAllowed();
+			newState.unSetWhiteShortCastlingAllowed();
+		} else if ((move.piece == WROOK && move.startPos == A1) || move.endPos == A1) {
+			newState.unSetWhiteLongCastlingAllowed();
+		} else if ((move.piece == WROOK && move.startPos == H1) || move.endPos == H1) {
+			newState.unSetWhiteShortCastlingAllowed();
+		}
+
+		if (move.piece == BKING) {
+			newState.unSetBlackLongCastlingAllowed();
+			newState.unSetBlackShortCastlingAllowed();
+		} else if ((move.piece == BROOK && move.startPos == A8) || move.endPos == A8) {
+			newState.unSetBlackLongCastlingAllowed();
+		} else if ((move.piece == BROOK && move.startPos == H8) || move.endPos == H8) {
+			newState.unSetBlackShortCastlingAllowed();
+		}
+	}
+
+	return newState;
+}
+
 

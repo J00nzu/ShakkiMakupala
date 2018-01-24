@@ -1,23 +1,18 @@
 #include "ui.h"
 #include <iostream>
 #include <Windows.h>
+#include <io.h>
+#include <fcntl.h>
 
 
 using namespace std;
 
-UI::UI(State* state) {
-	_state = state;
+UI::UI() {
+	_setmode(_fileno(stdout), _O_U16TEXT);
 }
 
-State* UI::getState() {
-	return _state;
-}
 
-void UI::setState(State* state) {
-	_state = state;
-}
-
-void UI::drawBoard() {
+void UI::drawBoard(const State& state) const{
 
 	SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_BLUE);
 
@@ -36,7 +31,7 @@ void UI::drawBoard() {
 					BACKGROUND_GREEN | BACKGROUND_BLUE);
 			}
 
-			const Piece* piece = _state->getPiece((POSITION)(y * 8 + x));
+			const Piece* piece = state.getPiece((POSITION)(y * 8 + x));
 			if (piece) {
 				wcout << " " << piece->getUnicode() << " ";
 			}
@@ -64,7 +59,7 @@ bool movesContainsEndPos(std::vector<PossibleMove> possibleMoves, POSITION pos) 
 	return false;
 }
 
-void UI::drawBoard(POSITION selectedPiece, std::vector<PossibleMove> possibleMoves) {
+void UI::drawBoard(const State& state, POSITION selectedPiece, std::vector<PossibleMove> possibleMoves) const{
 
 	SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_BLUE);
 
@@ -92,7 +87,7 @@ void UI::drawBoard(POSITION selectedPiece, std::vector<PossibleMove> possibleMov
 					BACKGROUND_GREEN | BACKGROUND_BLUE);
 			}
 
-			const Piece* piece = _state->getPiece(pos);
+			const Piece* piece = state.getPiece(pos);
 			if (piece) {
 				wcout << " " << piece->getUnicode() << " ";
 			}

@@ -13,4 +13,10 @@ void moveOrCapture(std::vector<PossibleMove>& list, const State& state, const Pi
 
 void capture(std::vector<PossibleMove>& list, const State& state, const Piece* piece, POSITION startPos, uint_least16_t dirs, size_t range);
 
+void checkCastling(std::vector<PossibleMove>& list, const State& state, const Piece* piece, POSITION startPos);
+
+void checkEnPassant(std::vector<PossibleMove>& list, const State& state, const Move& lastOpponentMove, const Piece* piece, POSITION startPos);
+
+void checkPromotionForPawnMoves(std::vector<PossibleMove>& list, const Piece* piece, POSITION startPos);
+
 };

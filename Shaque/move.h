@@ -10,7 +10,6 @@
 #define MOVE_H_EN_PASSANT_LEFT		0b00010000
 #define MOVE_H_EN_PASSANT_RIGHT		0b00100000
 #define MOVE_H_PROMOTION			0b01000000
-#define MOVE_H_CHECK				0b10000000
 
 class Piece;
 
@@ -46,9 +45,6 @@ struct Move {
 	inline void setPromotion() {
 		SetFlag(flags, MOVE_H_PROMOTION);
 	}
-	inline void setCheck() {
-		SetFlag(flags, MOVE_H_CHECK);
-	}
 
 
 	inline void unSetColorWhite() {
@@ -71,9 +67,6 @@ struct Move {
 	}
 	inline void unSetPromotion() {
 		UnsetFlag(flags, MOVE_H_PROMOTION);
-	}
-	inline void unSetCheck() {
-		UnsetFlag(flags, MOVE_H_CHECK);
 	}
 
 
@@ -104,9 +97,6 @@ struct Move {
 	}
 	inline bool getPromotion() const {
 		return (flags & MOVE_H_PROMOTION) != 0;
-	}
-	inline bool getCheck() const {
-		return (flags & MOVE_H_CHECK) != 0;
 	}
 };
 
