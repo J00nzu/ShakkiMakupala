@@ -55,6 +55,8 @@ Move selectMove(const std::vector<PossibleMove>& moves, POSITION poshison) {
 	}
 }
 
+
+/*
 Move HumanPlayer::askMove(const Game& game, const State& state, COLOR col) {
 	POSITION pos;
 	std::vector<PossibleMove> moves;
@@ -75,5 +77,22 @@ Move HumanPlayer::askMove(const Game& game, const State& state, COLOR col) {
 	}
 	return selectMove(moves, pos);
 }
+*/
 
-
+Move HumanPlayer::askMove(const Game& game, const State& state, COLOR col) {
+	std::vector<PossibleMove> allPossibleMoves = state.getAllLegalMoves(
+		game.getMoveHistory()->empty() ? Move() : game.getMoveHistory()->back());
+	if (allPossibleMoves.empty()) {
+		Move noMoves;
+		noMoves.setNoPossibleMoves();
+		return noMoves;
+	}
+	auto ui = game.getUI();
+	if (ui) {
+		return ui->askForMove(allPossibleMoves);
+	}
+	else {
+		wcerr << L"No UI in the game. Please create a game with UI if you have human players";
+		return allPossibleMoves[0].move;
+	}
+}

@@ -39,8 +39,8 @@ enum DIRECTION : uint_least16_t {
 	UPRIGHT =	0b000100000,
 	DOWNLEFT =	0b001000000,
 	DOWNRIGHT = 0b010000000,
-	DIAGONAL =	0b011110000,
-	STRAIGHT =	0b000001111,
+	DIAGONAL =	0b011110000, // has the bits of diagonal basic movements set
+	STRAIGHT =	0b000001111, // has the bits of straight basic movements set
 	ANY =		0b011111111,
-	KNIGHT =	0b100000000 // if KNIGHT direction is used in movegeneration, every other directions are ignored
+	KNIGHT =	0b100000000 // if KNIGHT direction is used in movegeneration, every other direction is ignored
 };

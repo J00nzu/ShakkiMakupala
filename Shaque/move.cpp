@@ -2,6 +2,7 @@
 #include "flagmanip.h"
 #include "piece.h"
 #include "state.h"
+#include "conversion.h"
 
 
 Move::Move(const Piece* pc, POSITION start, POSITION end){
@@ -13,12 +14,23 @@ Move::Move(const Piece* pc, POSITION start, POSITION end){
 	endPos = end;
 }
 
-std::string PossibleMove::toStr() {
-	std::string out;
-	out += State::getLetter(move.startPos);
-	out += std::to_string(State::getRank(move.startPos));
-	out += " to ";
-	out += State::getLetter(move.endPos);
-	out += std::to_string(State::getRank(move.endPos));
-	return out;
+bool Move::operator == (const Move& other) {
+	if (
+		(getCastlingLong() && other.getCastlingLong()) ||
+		(getCastlingShort() && other.getCastlingShort())) {
+		return true;
+	}
+	if (other.startPos == startPos && other.endPos == endPos && other.promotedTo == promotedTo) {
+		return true;
+	}
+	return false;
+}
+
+
+std::wstring PossibleMove::toStr() {
+	return moveToStr(move);
+}
+
+PossibleMove::operator Move() const {
+	return move;
 }

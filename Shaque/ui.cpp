@@ -3,7 +3,7 @@
 #include <Windows.h>
 #include <io.h>
 #include <fcntl.h>
-
+#include "conversion.h"
 
 using namespace std;
 
@@ -13,6 +13,7 @@ UI::UI() {
 
 
 void UI::drawBoard(const State& state) const{
+	system("cls");
 
 	SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_BLUE);
 
@@ -42,14 +43,14 @@ void UI::drawBoard(const State& state) const{
 		}
 		SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_BLUE);
 
-		wcout << "\n";
+		wcout << endl;
 	}
 
-	wcout << "   " << " A " << " B " << " C " << " D " << " E " << " F " << " G " << " H " << "\n";
-
+	wcout << "   " << " A " << " B " << " C " << " D " << " E " << " F " << " G " << " H " << endl;
+	Sleep(1000);
 }
 
-bool movesContainsEndPos(std::vector<PossibleMove> possibleMoves, POSITION pos) {
+bool movesContainsEndPos(const std::vector<PossibleMove>& possibleMoves,POSITION startPos, POSITION pos) {
 	for each (auto mov in possibleMoves)
 	{
 		if (mov.move.endPos == pos) {
@@ -59,7 +60,7 @@ bool movesContainsEndPos(std::vector<PossibleMove> possibleMoves, POSITION pos) 
 	return false;
 }
 
-void UI::drawBoard(const State& state, POSITION selectedPiece, std::vector<PossibleMove> possibleMoves) const{
+void UI::drawBoard(const State& state, POSITION selectedPiece, const std::vector<PossibleMove>& possibleMoves) const{
 
 	SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_BLUE);
 
@@ -74,7 +75,7 @@ void UI::drawBoard(const State& state, POSITION selectedPiece, std::vector<Possi
 				SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), BACKGROUND_INTENSITY |
 					BACKGROUND_BLUE);
 			}
-			else if(movesContainsEndPos(possibleMoves, pos)){
+			else if(movesContainsEndPos(possibleMoves,selectedPiece, pos)){
 				SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), BACKGROUND_INTENSITY |
 					BACKGROUND_RED);
 			}
@@ -103,4 +104,26 @@ void UI::drawBoard(const State& state, POSITION selectedPiece, std::vector<Possi
 
 	wcout << "   " << " A " << " B " << " C " << " D " << " E " << " F " << " G " << " H " << "\n";
 
+}
+
+
+Move UI::askForMove(const std::vector<PossibleMove>& possibleMoves) const{
+	while (true) {
+		Move selected;
+		wcout << L"Input a valid move in Dd1-e2 format (promotion is Pa7-a8Q): ";
+		std::wstring in;
+		wcin >> in;
+		if (!strToMove(in, selected, possibleMoves[0].move.getColor())) {
+			wcout << L"Invalid format!" << endl;
+			continue;
+		}
+		for each (auto mov in possibleMoves)
+		{
+			if (selected == mov.move) {
+				return mov.move;
+			}
+		}
+		wcout << L"Given move is not legal! grr : " << moveToStr(selected) << endl;
+
+	}
 }

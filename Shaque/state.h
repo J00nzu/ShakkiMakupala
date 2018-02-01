@@ -2,6 +2,8 @@
 #include "piece.h"
 #include "enums.h"
 #include "flagmanip.h"
+#include "movegeneration.h"
+#include "move.h"
 
 #define STATE_H_TURN_WHITE						0b00000001
 #define STATE_H_WHITE_LONG_CASTLING_ALLOWED		0b00000010
@@ -12,7 +14,7 @@
 #define STATE_H_BLACK_CHECKED					0b01000000
 
 class State {
-
+	static const MoveGenerator* safeGen;
 public:
 	PIECE board[8 * 8];
 	uint_least8_t flags;
@@ -20,33 +22,13 @@ public:
 	State() {};
 	const Piece* getPiece(POSITION pos) const;
 	void setPiece(POSITION pos, PIECE piece);
+	std::vector<PossibleMove> getAllLegalMoves(const Move& lastOpponentMove, const MoveGenerator* moveGen = safeGen) const;
+	std::vector<PossibleMove> getAllRawMoves(const Move& lastOpponentMove, const MoveGenerator* moveGen = safeGen) const;
 	State advanceTurn(const Move& move) const;
 	static State initialize();
 	static State initializeEmpty();
 	static int getRank(POSITION);
 	static char getLetter(POSITION pos);
-
-	//flag manipulation
-	/*
-	void setTurnWhite();
-	void setTurnBlack();
-	COLOR getTurnColor();
-
-	void setWhiteCastlingAllowed();
-	void setBlackCastlingAllowed();
-	void setWhiteChecked();
-	void setBlackChecked();
-
-	void unSetWhiteCastlingAllowed();
-	void unSetBlackCastlingAllowed();
-	void unSetWhiteChecked();
-	void unSetBlackChecked();
-
-	bool getWhiteCastlingAllowed();
-	bool getBlackCastlingAllowed();
-	bool getWhiteChecked();
-	bool getBlackChecked();
-	*/
 
 	inline void State::setTurnWhite() {
 		SetFlag(flags, STATE_H_TURN_WHITE);

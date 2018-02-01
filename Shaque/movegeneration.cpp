@@ -159,7 +159,7 @@ void movegeneration::capture(std::vector<PossibleMove>& list, const State& state
 
 bool checkAttackedSquares(const State& state, COLOR col, const POSITION* posList, size_t len) {
 	State bluffState(state);
-	for (int i = 0; i < len; i++) {
+	for (size_t i = 0; i < len; i++) {
 		POSITION pos = posList[i];
 		bluffState.board[pos] = col == WHITE ? BPAWN : WPAWN;
 	}
@@ -167,9 +167,11 @@ bool checkAttackedSquares(const State& state, COLOR col, const POSITION* posList
 	for (int i = 0; i < 64;i++) {
 		auto p = state.getPiece((POSITION)i);
 		if (p && p->getColor() == col) {
-			for each (auto pos in p->getPossibleMoves(bluffState,Move(pieces[WPAWN], A5, B5), (POSITION)i))
+			std::vector<PossibleMove> posMoves;
+			p->getPossibleMoves(posMoves, bluffState, Move(pieces[WPAWN], A5, B5), (POSITION)i);
+			for each (auto pos in posMoves)
 			{
-				for (int i = 0; i < len; i++) {
+				for (size_t i = 0; i < len; i++) {
 					POSITION positon = posList[i];
 					if (pos.move.endPos == positon) {
 						return false;
@@ -300,9 +302,11 @@ void movegeneration::checkEnPassant(std::vector<PossibleMove>& list, const State
 }
 
 void movegeneration::checkPromotionForPawnMoves(std::vector<PossibleMove>& list, const Piece* piece, POSITION startPos) {
+	std::vector<PossibleMove> toAdd(list.size());
+
 	for each (PossibleMove p in list)
 	{
-		if (piece->getColor() == WHITE && State::getRank(p.move.endPos) == 8) {
+		if (piece->getCode() == WPAWN && State::getRank(p.move.endPos) == 8) {
 			p.move.setPromotion();
 			p.move.promotedTo = WQUEEN;
 			Move m2(p.move);
@@ -311,11 +315,11 @@ void movegeneration::checkPromotionForPawnMoves(std::vector<PossibleMove>& list,
 			m2.promotedTo = WROOK;
 			Move m4(p.move);
 			m2.promotedTo = WBISHOP;
-			list.push_back(m2);
-			list.push_back(m3);
-			list.push_back(m4);
+			toAdd.push_back(m2);
+			toAdd.push_back(m3);
+			toAdd.push_back(m4);
 		}
-		else if (piece->getColor() == BLACK && State::getRank(p.move.endPos) == 1) {
+		else if (piece->getCode() == BPAWN && State::getRank(p.move.endPos) == 1) {
 			p.move.setPromotion();
 			p.move.promotedTo = BQUEEN;
 			Move m2(p.move);
@@ -324,12 +328,61 @@ void movegeneration::checkPromotionForPawnMoves(std::vector<PossibleMove>& list,
 			m2.promotedTo = BROOK;
 			Move m4(p.move);
 			m2.promotedTo = BBISHOP;
-			list.push_back(m2);
-			list.push_back(m3);
-			list.push_back(m4);
+			toAdd.push_back(m2);
+			toAdd.push_back(m3);
+			toAdd.push_back(m4);
+		}
+		toAdd.push_back(p);
+	}
+
+	if (toAdd.size() != list.size()) {
+		list.clear();
+		for each (auto m in toAdd)
+		{
+			list.push_back(m);
 		}
 	}
 }
+
+
+void movegeneration::pruneOutKingDangers(std::vector<PossibleMove>& list, const State& state) {
+	PIECE kingPiece = state.getTurnColor() == WHITE ? WKING : BKING;
+
+	std::vector< PossibleMove >::iterator it = list.begin();
+
+	while (it != list.end()) {
+		PossibleMove posMove = *it;
+
+		auto newState = state.advanceTurn(posMove.move);
+		std::vector<PossibleMove> allEnemyPossibleMoves;
+		POSITION kingPos;
+		for (size_t i = 0; i < 64; i++)
+		{
+			POSITION pos = (POSITION)i;
+			auto pc = newState.getPiece(pos);
+			if (!pc)
+				continue;
+			if (pc->getCode() == kingPiece) {
+				kingPos = pos;
+			}
+			if (pc->getColor() == newState.getTurnColor()) {
+				pc->getPossibleMoves(allEnemyPossibleMoves, newState, posMove.move, pos);
+			}
+		}
+
+		bool skipIt = false;
+		for each (auto enemyPosMove in allEnemyPossibleMoves)
+		{
+			if (enemyPosMove.move.endPos == kingPos) {
+				it = list.erase(it);
+				skipIt = true;
+				break;
+			}
+		}
+		if(!skipIt) ++it;
+	}
+}
+
 
 
 

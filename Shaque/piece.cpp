@@ -53,49 +53,40 @@ COLOR Piece::getColor() const {
 
 
 
-std::vector<PossibleMove> Rook::getPossibleMoves(const State& gameState, const Move& lastOpponentMove, POSITION pos) const {
-	std::vector<PossibleMove> moves;
+void Rook::getPossibleMoves(std::vector<PossibleMove>& moves, const State& gameState, const Move& lastOpponentMove, POSITION pos) const {
+	
 
 	movegeneration::moveOrCapture(moves, gameState, this, pos, DIRECTION::STRAIGHT, 0);
 
-	return moves;
 }
 
-std::vector<PossibleMove> Knight::getPossibleMoves(const State& gameState, const Move& lastOpponentMove, POSITION pos) const {
-	std::vector<PossibleMove> moves;
+void Knight::getPossibleMoves(std::vector<PossibleMove>& moves, const State& gameState, const Move& lastOpponentMove, POSITION pos) const {
+	
 
 	movegeneration::moveOrCapture(moves, gameState, this, pos, DIRECTION::KNIGHT, 0);
-
-	return moves;
 }
 
-std::vector<PossibleMove> Bishop::getPossibleMoves(const State& gameState, const Move& lastOpponentMove, POSITION pos) const {
-	std::vector<PossibleMove> moves;
+void Bishop::getPossibleMoves(std::vector<PossibleMove>& moves, const State& gameState, const Move& lastOpponentMove, POSITION pos) const {
+	
 
 	movegeneration::moveOrCapture(moves, gameState, this, pos, DIRECTION::DIAGONAL, 0);
-
-	return moves;
 }
 
-std::vector<PossibleMove> Queen::getPossibleMoves(const State& gameState, const Move& lastOpponentMove, POSITION pos) const {
-	std::vector<PossibleMove> moves;
+void Queen::getPossibleMoves(std::vector<PossibleMove>& moves, const State& gameState, const Move& lastOpponentMove, POSITION pos) const {
+	
 
 	movegeneration::moveOrCapture(moves, gameState, this, pos, DIRECTION::ANY, 0);
-
-	return moves;
 }
 
-std::vector<PossibleMove> King::getPossibleMoves(const State& gameState, const Move& lastOpponentMove, POSITION pos) const {
-	std::vector<PossibleMove> moves;
+void King::getPossibleMoves(std::vector<PossibleMove>& moves, const State& gameState, const Move& lastOpponentMove, POSITION pos) const {
+	
 
 	movegeneration::moveOrCapture(moves, gameState, this, pos, DIRECTION::ANY, 1);
 	movegeneration::checkCastling(moves, gameState, this, pos);
-
-	return moves;
 }
 
-std::vector<PossibleMove> Pawn::getPossibleMoves(const State& gameState, const Move& lastOpponentMove, POSITION pos) const {
-	std::vector<PossibleMove> moves;
+void Pawn::getPossibleMoves(std::vector<PossibleMove>& moves, const State& gameState, const Move& lastOpponentMove, POSITION pos) const {
+	
 	int moveRange = 1;
 
 	COLOR color = this->_color;
@@ -122,6 +113,4 @@ std::vector<PossibleMove> Pawn::getPossibleMoves(const State& gameState, const M
 		movegeneration::checkEnPassant(moves, gameState, lastOpponentMove, this, pos);
 		movegeneration::checkPromotionForPawnMoves(moves, this, pos);
 	}
-
-	return moves;
 }

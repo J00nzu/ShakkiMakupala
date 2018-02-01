@@ -4,6 +4,8 @@
 #include "movement.h"
 #include <math.h>
 
+const MoveGenerator* State::safeGen = new MoveGenerator();
+
 const Piece* State::getPiece(POSITION pos) const{
 	if (board[pos] == EMPTY) {
 		return nullptr;
@@ -15,6 +17,38 @@ const Piece* State::getPiece(POSITION pos) const{
 
 void State::setPiece(POSITION pos, PIECE piece) {
 	board[pos] = piece;
+}
+
+std::vector<PossibleMove> State::getAllLegalMoves(const Move& lastOpponentMove, const MoveGenerator* moveGen) const {
+	std::vector<PossibleMove> allPossibleMoves;
+	for (size_t i = 0; i < 64; i++)
+	{
+		POSITION pos = (POSITION)i;
+		auto pc = getPiece(pos);
+		if (!pc)
+			continue;
+		if (pc->getColor() == getTurnColor()) {
+			pc->getPossibleMoves(allPossibleMoves, *this, lastOpponentMove, pos);
+		}
+	}
+	movegeneration::pruneOutKingDangers(allPossibleMoves, *this);
+
+	return allPossibleMoves;
+}
+
+std::vector<PossibleMove> State::getAllRawMoves(const Move& lastOpponentMove, const MoveGenerator* moveGen) const {
+	std::vector<PossibleMove> allPossibleMoves;
+	for (size_t i = 0; i < 64; i++)
+	{
+		POSITION pos = (POSITION)i;
+		auto pc = getPiece(pos);
+		if (!pc)
+			continue;
+		if (pc->getColor() == getTurnColor()) {
+			pc->getPossibleMoves(allPossibleMoves, *this, lastOpponentMove, pos);
+		}
+	}
+	return allPossibleMoves;
 }
 
 

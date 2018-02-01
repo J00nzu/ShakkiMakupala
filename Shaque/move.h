@@ -10,6 +10,8 @@
 #define MOVE_H_EN_PASSANT_LEFT		0b00010000
 #define MOVE_H_EN_PASSANT_RIGHT		0b00100000
 #define MOVE_H_PROMOTION			0b01000000
+#define MOVE_H_NO_POSSIBLE_MOVES	0b10000000
+
 
 class Piece;
 
@@ -23,6 +25,7 @@ struct Move {
 
 	Move(){}
 	Move(const Piece* pc, POSITION start, POSITION end);
+	bool operator == (const Move& other);
 
 	inline void setColorWhite() {
 		SetFlag(flags, MOVE_H_COLOR_WHITE);
@@ -44,6 +47,9 @@ struct Move {
 	}
 	inline void setPromotion() {
 		SetFlag(flags, MOVE_H_PROMOTION);
+	}
+	inline void setNoPossibleMoves() {
+		SetFlag(flags, MOVE_H_NO_POSSIBLE_MOVES);
 	}
 
 
@@ -68,7 +74,9 @@ struct Move {
 	inline void unSetPromotion() {
 		UnsetFlag(flags, MOVE_H_PROMOTION);
 	}
-
+	inline void unSetNoPossibleMoves() {
+		UnsetFlag(flags, MOVE_H_NO_POSSIBLE_MOVES);
+	}
 
 
 
@@ -98,6 +106,9 @@ struct Move {
 	inline bool getPromotion() const {
 		return (flags & MOVE_H_PROMOTION) != 0;
 	}
+	inline bool getNoPossibleMoves() {
+		return (flags & MOVE_H_NO_POSSIBLE_MOVES) != 0;
+	}
 };
 
 struct PossibleMove {
@@ -109,7 +120,9 @@ struct PossibleMove {
 		move = m;
 	}
 
-	std::string toStr();
+	operator Move() const;
+
+	std::wstring toStr();
 };
 
 

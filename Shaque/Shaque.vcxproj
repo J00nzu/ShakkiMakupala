@@ -142,7 +142,9 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="attackmap.h" />
     <ClInclude Include="conversion.h" />
+    <ClInclude Include="decisionalgorithm.h" />
     <ClInclude Include="enums.h" />
     <ClInclude Include="flagmanip.h" />
     <ClInclude Include="game.h" />
@@ -152,11 +154,14 @@
     <ClInclude Include="piece.h" />
     <ClInclude Include="player.h" />
     <ClInclude Include="state.h" />
+    <ClInclude Include="stateevaluator.h" />
     <ClInclude Include="ui.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="aiplayer.cpp" />
     <ClCompile Include="conversion.cpp" />
     <ClCompile Include="game.cpp" />
+    <ClCompile Include="minmax.cpp" />
     <ClCompile Include="move.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="movegeneration.cpp" />
@@ -164,6 +169,7 @@
     <ClCompile Include="piece.cpp" />
     <ClCompile Include="player.cpp" />
     <ClCompile Include="state.cpp" />
+    <ClCompile Include="stateevaluator.cpp" />
     <ClCompile Include="ui.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

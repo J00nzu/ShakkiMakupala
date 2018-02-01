@@ -12,22 +12,35 @@
 
 
 /*TODO
-* King move - King does not end up in check
-* Check & checkmate
 * Game draw judge
-* Ask player for promotion piece
+* State evaluator for AI
+* - Default State evaluator
+* - Neural net State evaluator
+* Move evaluator for AI
+* - Short term gains
 */
 
 int main() {
 
-	Player* p1 = new HumanPlayer();
-	Player* p2 = new HumanPlayer();
+	//Player* p1 = new HumanPlayer();
+	StateEvaluator* stateEv = new DefaultStateEvaluator();
+	DecisionAlgorithm* algorithm = new MinMaxAlgorithm();
+
+	Player* p1 = new AIPlayer(stateEv, algorithm);
+	Player* p2 = new AIPlayer(stateEv, algorithm);
 	UI ui;
 
 
 	Game game(p1, p2, &ui);
 
-	game.Play();
+	GameRecording record = game.Play();
+
+	if (record.outcome == OUTCOME::WIN_WHITE) {
+		std::wcout << "Checkmate. White wins!";
+	}
+	else if (record.outcome == OUTCOME::WIN_BLACK) {
+		std::wcout << "Checkmate. Black wins!";
+	}
 
 	/*
 	State gameState = State::initializeEmpty();

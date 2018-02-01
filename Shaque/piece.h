@@ -49,7 +49,7 @@ public:
 	std::wstring getUnicode() const;
 	void setColor(COLOR);
 	COLOR getColor() const;
-	virtual std::vector<PossibleMove> getPossibleMoves(const State& gameState, const Move& lastOpponentMove, POSITION pos) const = 0;
+	virtual void getPossibleMoves(std::vector<PossibleMove>& moves, const State& gameState, const Move& lastOpponentMove, POSITION pos) const = 0;
 };
 
 extern const Piece* pieces[12];
@@ -58,41 +58,41 @@ class Rook : public Piece {
 public:
 	Rook(const std::wstring& unicode, PIECE code, COLOR color) : Piece(unicode, code, color) {};
 	Rook() {};
-	std::vector<PossibleMove> getPossibleMoves(const State&, const Move&, POSITION) const;
+	void getPossibleMoves(std::vector<PossibleMove>&, const State&, const Move&, POSITION) const;
 };
 
 class Knight : public Piece {
 public:
 	Knight(const std::wstring& unicode, PIECE code, COLOR color) : Piece(unicode, code, color) {};
 	Knight() {};
-	std::vector<PossibleMove> getPossibleMoves(const State&, const Move&, POSITION) const;
+	void getPossibleMoves(std::vector<PossibleMove>&, const State&, const Move&, POSITION) const;
 };
 
 class Bishop : public Piece {
 public:
 	Bishop(const std::wstring& unicode, PIECE code, COLOR color) : Piece(unicode, code, color) {};
 	Bishop() {};
-	std::vector<PossibleMove> getPossibleMoves(const State&, const Move&, POSITION) const;
+	void getPossibleMoves(std::vector<PossibleMove>&, const State&, const Move&, POSITION) const;
 };
 
 class Queen : public Piece {
 public:
 	Queen(const std::wstring& unicode, PIECE code, COLOR color) : Piece(unicode, code, color) {};
 	Queen() {};
-	std::vector<PossibleMove> getPossibleMoves(const State&, const Move&, POSITION) const;
+	void getPossibleMoves(std::vector<PossibleMove>&, const State&, const Move&, POSITION) const;
 };
 
 class King : public Piece {
 public:
 	King(const std::wstring& unicode, PIECE code, COLOR color) : Piece(unicode, code, color) {};
 	King() {};
-	std::vector<PossibleMove> getPossibleMoves(const State&, const Move&, POSITION) const;
+	void getPossibleMoves(std::vector<PossibleMove>&, const State&, const Move&, POSITION) const;
 };
 
 class Pawn : public Piece {
 public:
 	Pawn(const std::wstring& unicode, PIECE code, COLOR color) : Piece(unicode, code, color) {};
 	Pawn() {};
-	std::vector<PossibleMove> getPossibleMoves(const State&, const Move&, POSITION) const;
+	void getPossibleMoves(std::vector<PossibleMove>&, const State&, const Move&, POSITION) const;
 };
 

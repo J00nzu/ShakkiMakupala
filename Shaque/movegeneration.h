@@ -5,6 +5,10 @@
 #include "move.h"
 #include "movement.h"
 
+class MoveGenerator {
+	//TODO
+};
+
 namespace movegeneration{
 
 void move(std::vector<PossibleMove>& list,const State& state, const Piece* piece, POSITION startPos, uint_least16_t dirs, size_t range);
@@ -19,4 +23,6 @@ void checkEnPassant(std::vector<PossibleMove>& list, const State& state, const M
 
 void checkPromotionForPawnMoves(std::vector<PossibleMove>& list, const Piece* piece, POSITION startPos);
 
+// Remove any moves that put the king in danger
+void pruneOutKingDangers(std::vector<PossibleMove>& list, const State& state);
 };

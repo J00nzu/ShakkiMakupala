@@ -42,7 +42,27 @@ GameRecording Game::Play() {
 			move = _pblack->askMove(*this, currentState, BLACK);
 		}
 
+		if (move.getNoPossibleMoves()) { // if a player has no moves left :x
+			GameRecording record;
+			record.moveHistory = _move_history;
+			record.stateHistory = _state_history;
+			if (currentState.getTurnColor() == WHITE) {
+				record.outcome = WIN_BLACK;
+			}
+			else {
+				record.outcome = WIN_WHITE;
+			}
+			return record;
+		}
+
 		currentState = currentState.advanceTurn(move);
 		_move_history.push_back(move);
+
+		if (currentState.getTurnColor() == WHITE) {
+			_pwhite->opponentMoveMade(*this, currentState, move, BLACK);
+		}
+		else {
+			_pblack->opponentMoveMade(*this, currentState, move, WHITE);
+		}
 	}
 }
