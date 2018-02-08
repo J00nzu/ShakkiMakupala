@@ -2,6 +2,7 @@
 #include <iostream>
 
 
+/*
 int main() {
 
 	int x = 0x61;
@@ -18,4 +19,4 @@ int main() {
 	L'a'
 
 	return 0;
-}
+}*/
