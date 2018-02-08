@@ -130,7 +130,7 @@ State State::initializeEmpty()
 
 int State::getRank(POSITION pos) {
 	int posi = pos;
-	int rank = 8 - (int)floor(pos / 8.0);
+	int rank = 8 - (int)((pos-0.25) / 8.0);
 	return rank;
 }
 

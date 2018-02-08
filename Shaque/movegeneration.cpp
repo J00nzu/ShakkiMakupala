@@ -302,11 +302,19 @@ void movegeneration::checkEnPassant(std::vector<PossibleMove>& list, const State
 }
 
 void movegeneration::checkPromotionForPawnMoves(std::vector<PossibleMove>& list, const Piece* piece, POSITION startPos) {
-	std::vector<PossibleMove> toAdd(list.size());
+	//std::vector<PossibleMove> toAdd;
 
-	for each (PossibleMove p in list)
-	{
+	std::vector< PossibleMove >::iterator it = list.begin();
+	auto end = list.end();
+	while (it != end) {
+		PossibleMove p = *it;
+		bool skipIt = false;
+
 		if (piece->getCode() == WPAWN && State::getRank(p.move.endPos) == 8) {
+			it._Ptr->move.setPromotion();
+			it._Ptr->move.promotedTo = WQUEEN;
+
+			/*
 			p.move.setPromotion();
 			p.move.promotedTo = WQUEEN;
 			Move m2(p.move);
@@ -315,11 +323,18 @@ void movegeneration::checkPromotionForPawnMoves(std::vector<PossibleMove>& list,
 			m2.promotedTo = WROOK;
 			Move m4(p.move);
 			m2.promotedTo = WBISHOP;
+			toAdd.push_back(p);
 			toAdd.push_back(m2);
 			toAdd.push_back(m3);
 			toAdd.push_back(m4);
+			it = list.erase(it);
+			skipIt = true;*/
 		}
 		else if (piece->getCode() == BPAWN && State::getRank(p.move.endPos) == 1) {
+
+			it._Ptr->move.setPromotion();
+			it._Ptr->move.promotedTo = BQUEEN;
+			/*
 			p.move.setPromotion();
 			p.move.promotedTo = BQUEEN;
 			Move m2(p.move);
@@ -328,20 +343,23 @@ void movegeneration::checkPromotionForPawnMoves(std::vector<PossibleMove>& list,
 			m2.promotedTo = BROOK;
 			Move m4(p.move);
 			m2.promotedTo = BBISHOP;
+			toAdd.push_back(p);
 			toAdd.push_back(m2);
 			toAdd.push_back(m3);
 			toAdd.push_back(m4);
-		}
-		toAdd.push_back(p);
-	}
 
-	if (toAdd.size() != list.size()) {
-		list.clear();
-		for each (auto m in toAdd)
-		{
-			list.push_back(m);
+			it = list.erase(it);
+			skipIt = true;*/
 		}
+
+		/* (!skipIt)*/ ++it;
 	}
+	/*
+	for each (auto m in toAdd)
+	{
+		list.push_back(m);
+	}*/
+	
 }
 
 

@@ -9,7 +9,7 @@ int DefaultStateEvaluator::evaluate(const State& state) const {
 		case EMPTY:
 			break;
 		case WPAWN:
-			score += 10+State::getRank((POSITION)i);
+			score += 10;//+State::getRank((POSITION)i);
 			break;
 		case BPAWN:
 			score += -(10 + (9 - State::getRank((POSITION)i)));

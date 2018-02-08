@@ -54,33 +54,27 @@ COLOR Piece::getColor() const {
 
 
 void Rook::getPossibleMoves(std::vector<PossibleMove>& moves, const State& gameState, const Move& lastOpponentMove, POSITION pos) const {
-	
 
 	movegeneration::moveOrCapture(moves, gameState, this, pos, DIRECTION::STRAIGHT, 0);
-
 }
 
 void Knight::getPossibleMoves(std::vector<PossibleMove>& moves, const State& gameState, const Move& lastOpponentMove, POSITION pos) const {
 	
-
 	movegeneration::moveOrCapture(moves, gameState, this, pos, DIRECTION::KNIGHT, 0);
 }
 
 void Bishop::getPossibleMoves(std::vector<PossibleMove>& moves, const State& gameState, const Move& lastOpponentMove, POSITION pos) const {
 	
-
 	movegeneration::moveOrCapture(moves, gameState, this, pos, DIRECTION::DIAGONAL, 0);
 }
 
 void Queen::getPossibleMoves(std::vector<PossibleMove>& moves, const State& gameState, const Move& lastOpponentMove, POSITION pos) const {
 	
-
 	movegeneration::moveOrCapture(moves, gameState, this, pos, DIRECTION::ANY, 0);
 }
 
 void King::getPossibleMoves(std::vector<PossibleMove>& moves, const State& gameState, const Move& lastOpponentMove, POSITION pos) const {
 	
-
 	movegeneration::moveOrCapture(moves, gameState, this, pos, DIRECTION::ANY, 1);
 	movegeneration::checkCastling(moves, gameState, this, pos);
 }

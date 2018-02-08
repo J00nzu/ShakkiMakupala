@@ -83,13 +83,13 @@ Move MinMaxAlgorithm::decideAMove(const State& state, const Move& lastOpponentMo
 		State newState = state.advanceTurn(move);
 		int score;
 		if (state.getTurnColor() == WHITE) {
-			score = mini(2, newState, move, eval);
+			score = mini(3, newState, move, eval);
 			if (score > bestMove.eval) {
 				bestMove.move = move;
 				bestMove.eval = score;
 			}
 		}else {
-			score = maxi(2, newState, move, eval);
+			score = maxi(3, newState, move, eval);
 			if (score < bestMove.eval) {
 				bestMove.move = move;
 				bestMove.eval = score;
