@@ -81,6 +81,9 @@
     <ClCompile Include="posstateev.cpp">
       <Filter>Source Files\ai</Filter>
     </ClCompile>
+    <ClCompile Include="dumbai.cpp">
+      <Filter>Source Files\ai</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="bitboardops.h">

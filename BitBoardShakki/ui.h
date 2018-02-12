@@ -7,4 +7,5 @@ public:
 
 	UI();
 	void drawBoard(const State& state, bool clear = false) const;
+	Move askForMove(const MoveSet& possibleMoves) const;
 };

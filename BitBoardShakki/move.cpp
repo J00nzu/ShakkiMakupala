@@ -66,6 +66,14 @@ Move::Move(BITPOS from, BITPOS to, PIECE piece, MoveType type) {
 	auto flags = getFlagsFrom(type);
 
 	m_Move = 0 | (fromindex) | (toindex << 6) | (piece << 12) | (flags << 20);
+
+#ifdef _DEBUG
+	 _dbg_from = from;
+	 _dbg_to = to;
+	 _dbg_piece = piece;
+	 _dbg_cPiece = piece;
+	 _dbg_mType = type;
+#endif
 }
 
 Move::Move(BITPOS from, BITPOS to, PIECE piece, MoveType type, PIECE cPiece) {
@@ -74,6 +82,35 @@ Move::Move(BITPOS from, BITPOS to, PIECE piece, MoveType type, PIECE cPiece) {
 	auto flags = getFlagsFrom(type);
 
 	m_Move = 0 | (fromindex) | (toindex << 6) | (piece << 12) | (cPiece << 16) | (flags << 20);
+	
+#ifdef _DEBUG
+	_dbg_from = from;
+	_dbg_to = to;
+	_dbg_piece = piece;
+	_dbg_cPiece = cPiece;
+	_dbg_mType = type;
+#endif
+}
+
+Move::Move(int fromIdx, int toIdx, PIECE piece, int flags) {
+	m_Move = 0 | (fromIdx) | (toIdx << 6) | (piece << 12) | (flags << 20);
+#ifdef _DEBUG
+	_dbg_from = (BITPOS)(1ULL << fromIdx);
+	_dbg_to = (BITPOS)(1ULL << toIdx);
+	_dbg_piece = piece;
+	_dbg_cPiece = piece;
+	_dbg_mType = getMoveType();
+#endif
+}
+Move::Move(int fromIdx, int toIdx, PIECE piece, int flags, PIECE cPiece) {
+	m_Move = 0 | (fromIdx) | (toIdx << 6) | (piece << 12) | (cPiece << 16) | (flags << 20);
+#ifdef _DEBUG
+	_dbg_from = (BITPOS)(1ULL << fromIdx);
+	_dbg_to = (BITPOS)(1ULL << toIdx);
+	_dbg_piece = piece;
+	_dbg_cPiece = cPiece;
+	_dbg_mType = getMoveType();
+#endif
 }
 
 Move::Move(uint_fast32_t move) {

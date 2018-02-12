@@ -6,6 +6,8 @@
 #include <fcntl.h>
 #include <iostream>
 
+/*TODO castling human*/
+
 int main() {
 
 	//Player* p1 = new HumanPlayer();
@@ -14,10 +16,11 @@ int main() {
 
 	DecisionAlgorithm* minmax = new MinMaxAlgorithm();
 	DecisionAlgorithm* alphabeta = new AlphaBetaAlgorithm();
+	DecisionAlgorithm* dumbai = new DumbDecisions();
 
 
 	Player* p1 = new AIPlayer(posStateEv, alphabeta);
-	Player* p2 = new AIPlayer(stateEv, minmax);
+	Player* p2 = new AIPlayer(stateEv, alphabeta);
 
 
 	Game game(p1, p2);

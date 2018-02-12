@@ -58,6 +58,8 @@ public:
 
 	Move(BITPOS from, BITPOS to, PIECE piece, MoveType type);
 	Move(BITPOS from, BITPOS to, PIECE piece, MoveType type, PIECE cPiece);
+	Move(int fromIdx, int toIdx, PIECE piece, int flags);
+	Move(int fromIdx, int toIdx, PIECE piece, int flags, PIECE cPiece);
 	Move(uint_fast32_t move);
 	Move();
 
@@ -94,6 +96,15 @@ public:
 
 
 	MoveType getMoveType() const;
+
+#ifdef _DEBUG
+private:
+	BITPOS _dbg_from;
+	BITPOS _dbg_to;
+	PIECE _dbg_piece;
+	PIECE _dbg_cPiece;
+	MoveType _dbg_mType;
+#endif
 };
 
 #define MOVESET_MAX_MOVES 218
@@ -143,7 +154,7 @@ public:
 	void push_back(const Move& move);
 	int size() const;
 	bool empty() const;
-	Move& get(int index);
+	Move get(int index) const;
 	void set(int index, const Move& other);
 	Move& operator[](int index);
 	void erase(int index);

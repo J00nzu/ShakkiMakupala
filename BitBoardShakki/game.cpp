@@ -55,3 +55,14 @@ GameRecording Game::Play(bool drawUI) {
 		}
 	}
 }
+
+int Game::stateOccurredTimes(const State& state) const {
+	int times = 0;
+	for each (auto st in _state_history)
+	{
+		if (state == st) {
+			times++;
+		}
+	}
+	return times;
+}

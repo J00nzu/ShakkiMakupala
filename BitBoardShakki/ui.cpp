@@ -1,4 +1,5 @@
 #include "ui.h"
+#include "convert.h"
 #include <iostream>
 #include <Windows.h>
 #include <io.h>
@@ -48,4 +49,35 @@ void UI::drawBoard(const State& state, bool clear) const {
 	}
 
 	wcout << "   " << " A " << " B " << " C " << " D " << " E " << " F " << " G " << " H " << endl;
+}
+
+Move UI::askForMove(const MoveSet& possibleMoves) const {
+	while (true) {
+		Move selected;
+		wcout << L"Input a valid move in Dd1-e2 format (promotion is Pa7-a8Q): ";
+		std::wstring in;
+		wcin >> in;
+		if (!strToMove(in, selected, possibleMoves.get(0).getColor())) {
+			wcout << L"Invalid format!" << endl;
+			continue;
+		}
+		for each (auto mov in possibleMoves)
+		{
+			if (selected.isCastle()) {
+				if (selected.getMoveType() == mov.getMoveType()) {
+					return mov;
+				}
+			}else if (selected.isPromotion()) {
+				if (selected.getCPiece() == mov.getCPiece() && selected.getFromBB() == mov.getFromBB()
+					&& selected.getToBB() == mov.getToBB()) {
+					return mov;
+				}
+			}else if (selected.getFromBB() == mov.getFromBB()
+				&& selected.getToBB() == mov.getToBB()) {
+				return mov;
+			}
+		}
+		wcout << L"Given move is not legal! grr : " << moveToStr(selected) << endl;
+
+	}
 }

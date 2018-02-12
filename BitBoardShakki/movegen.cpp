@@ -191,7 +191,7 @@ void GenPawnAttacks(MoveSet& list, const State& state, PIECE piece, COLOR col) {
 
 			if (col == WHITE) {
 				for (int i = 6; i < 12; i++) {
-					if (CheckFlag(state.pieceBB[i+6], endPos)) {
+					if (CheckFlag(state.pieceBB[i], endPos)) {
 						PIECE capP = (PIECE)i;
 						FilterAndAddPawnPromoCapture(list, piece, col, (BITPOS)startPos, (BITPOS)endPos, capP);
 						break;

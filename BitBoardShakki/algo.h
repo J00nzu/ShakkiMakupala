@@ -1,6 +1,7 @@
 #pragma once
 #include "move.h"
 #include "statebb.h"
+#include "game.h"
 
 class StateEvaluator {
 public:
@@ -20,15 +21,20 @@ public:
 
 class DecisionAlgorithm {
 public:
-	virtual Move decideAMove(const State& state, const Move& lastOpponentMove, const StateEvaluator* eval) = 0;
+	virtual Move decideAMove(const State& state, const Game& game, const Move& lastOpponentMove, const StateEvaluator* eval) = 0;
 };
 
 class MinMaxAlgorithm : public DecisionAlgorithm {
 public:
-	Move decideAMove(const State& state, const Move& lastOpponentMove, const StateEvaluator* eval);
+	Move decideAMove(const State& state, const Game& game, const Move& lastOpponentMove, const StateEvaluator* eval);
+};
+
+class DumbDecisions : public DecisionAlgorithm {
+public:
+	Move decideAMove(const State& state, const Game& game, const Move& lastOpponentMove, const StateEvaluator* eval);
 };
 
 class AlphaBetaAlgorithm : public DecisionAlgorithm {
 public:
-	Move decideAMove(const State& state, const Move& lastOpponentMove, const StateEvaluator* eval);
+	Move decideAMove(const State& state, const Game& game, const Move& lastOpponentMove, const StateEvaluator* eval);
 };

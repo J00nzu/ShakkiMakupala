@@ -70,7 +70,7 @@ int mini(int depth, const State& state, const Move& lastOpponentMove, const Stat
 
 
 
-Move MinMaxAlgorithm::decideAMove(const State& state, const Move& lastOpponentMove, const StateEvaluator* eval) {
+Move MinMaxAlgorithm::decideAMove(const State& state, const Game& game, const Move& lastOpponentMove, const StateEvaluator* eval) {
 	srand(0);
 	MinMaxReturn bestMove;
 	const MoveGenerator* moveGen = &MoveGenerator::getInstance();
@@ -82,6 +82,10 @@ Move MinMaxAlgorithm::decideAMove(const State& state, const Move& lastOpponentMo
 	for each (auto move in mvs)
 	{
 		State newState = state.advanceTurn(move);
+		if (game.stateOccurredTimes(newState) >= 2) {
+			continue;
+		}
+
 		int score;
 		if (state.getTurnColor() == WHITE) {
 			score = mini(NUM_DEPTH, newState, move, eval, moveGen);

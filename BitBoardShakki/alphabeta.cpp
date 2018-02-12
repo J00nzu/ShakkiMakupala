@@ -6,19 +6,21 @@
 #include <mutex>
 
 
-#define NUM_DEPTH 4
+#define NUM_DEPTH 5
 
-struct AlphaBetaReturn {
+struct AlphaBetaReturn { 
 	int eval = 0;
 	Move move;
 	const State* state;
 	const StateEvaluator* evaluator;
+	const Game* game;
 
 	AlphaBetaReturn() {};
-	AlphaBetaReturn(const State* st, const Move& m, const StateEvaluator* e) {
+	AlphaBetaReturn(const State* st, const Game* g, const Move& m, const StateEvaluator* e) {
 		move = m;
 		state = st;
 		evaluator = e;
+		game = g;
 
 		if (state->getTurnColor() == WHITE) {
 			eval = INT_MIN;
@@ -30,10 +32,10 @@ struct AlphaBetaReturn {
 };
 
 
-MoveSet& getMoves(const State& state, const Move& lastOpponenMove) {
+MoveSet& getMoves(const State& state, const Move& lastOpponentMove) {
 	static const MoveGenerator* moveGen = &MoveGenerator::getInstance();
 
-	MoveSet moves = moveGen->GenPseudoLegalMoves(state, lastOpponenMove);
+	MoveSet moves = moveGen->GenPseudoLegalMoves(state, lastOpponentMove);
 	moves.sort();
 	return moves;
 }
@@ -120,6 +122,11 @@ void workerThread() {
 			queueMutex.unlock();
 
 			State newState = next->state->advanceTurn(next->move);
+
+			if (next->game->stateOccurredTimes(newState) >= 2) {
+				continue;
+			}
+
 			bool late = ((next->state->pieceBB[Wqueen] | next->state->pieceBB[Bqueen]) == 0);
 			int depth = NUM_DEPTH + ((int)late);
 
@@ -155,7 +162,7 @@ void LaunchAndWaitWorkers() {
 }
 
 
-Move AlphaBetaAlgorithm::decideAMove(const State& state, const Move& lastOpponentMove, const StateEvaluator* eval) {
+Move AlphaBetaAlgorithm::decideAMove(const State& state, const Game& game, const Move& lastOpponentMove, const StateEvaluator* eval) {
 	srand(0);
 	std::vector<AlphaBetaReturn> returnMoves;
 	static const MoveGenerator* moveGen = &MoveGenerator::getInstance();
@@ -169,7 +176,7 @@ Move AlphaBetaAlgorithm::decideAMove(const State& state, const Move& lastOpponen
 	mvs.sort();
 	for each (auto move in mvs)
 	{
-		AlphaBetaReturn abr(&initial, move, eval);
+		AlphaBetaReturn abr(&initial, &game, move, eval);
 		returnMoves.push_back(abr);
 	}
 

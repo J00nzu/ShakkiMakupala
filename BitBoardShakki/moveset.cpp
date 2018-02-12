@@ -68,7 +68,7 @@ int MoveSet::size() const{
 bool MoveSet::empty() const {
 	return _len == 0;
 }
-Move& MoveSet::get(int index) {
+Move MoveSet::get(int index) const{
 	return _arr[index];
 }
 void MoveSet::set(int index, const Move& other) {

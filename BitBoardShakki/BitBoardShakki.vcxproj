@@ -114,6 +114,7 @@
     <ClCompile Include="aiplayer.cpp" />
     <ClCompile Include="alphabeta.cpp" />
     <ClCompile Include="convert.cpp" />
+    <ClCompile Include="dumbai.cpp" />
     <ClCompile Include="findmagics.cpp" />
     <ClCompile Include="game.cpp" />
     <ClCompile Include="magic.cpp" />

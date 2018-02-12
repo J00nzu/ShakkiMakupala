@@ -18,6 +18,7 @@ public:
 	Game(Player* white, Player* black);
 	const std::vector<State>* getStateHistory() const;
 	const std::vector<Move>* getMoveHistory() const;
+	int stateOccurredTimes(const State& state) const;
 
 	GameRecording Play(bool drawUI);
 };
