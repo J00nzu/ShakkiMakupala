@@ -97,7 +97,7 @@ U64 bDblPushTargets(U64 bpawns, U64 empty) {
 	return bitB_soutOne(singlePushs) & empty & rank5;
 }
 
-void FilterAndAddPawnPromoPush(MoveSet& list, PIECE piece, COLOR col, BITPOS startPos, BITPOS endPos) {
+void FilterAndAddPawnPromoPush(MoveSet& list, PIECE piece, COLOR col, int startPosIdx, int endPosIdx, BITPOS startPos, BITPOS endPos) {
 	U64 rankp = 0;
 	if (col == WHITE) {
 		rankp = U64(0xFF00000000000000);
@@ -107,22 +107,23 @@ void FilterAndAddPawnPromoPush(MoveSet& list, PIECE piece, COLOR col, BITPOS sta
 	}
 
 	if (endPos & rankp) {
-		Move qp(startPos, endPos, piece, Move::PROMOTION_QUEEN);
-		Move np(startPos, endPos, piece, Move::PROMOTION_KNIGHT);
-		Move rp(startPos, endPos, piece, Move::PROMOTION_ROOK);
-		Move bp(startPos, endPos, piece, Move::PROMOTION_BISHOP);
+
+		Move qp(startPosIdx, endPosIdx, piece, MOVE_FLAGS_PROMO_Q);
+		Move np(startPosIdx, endPosIdx, piece, MOVE_FLAGS_PROMO_N);
+		Move rp(startPosIdx, endPosIdx, piece, MOVE_FLAGS_PROMO_R);
+		Move bp(startPosIdx, endPosIdx, piece, MOVE_FLAGS_PROMO_B);
 		list.push_back(qp);
 		list.push_back(np);
 		list.push_back(rp);
 		list.push_back(bp);
 	}
 	else {
-		Move move(startPos, endPos, piece, Move::QUIET);
+		Move move(startPosIdx, endPosIdx, piece,MOVE_FLAGS_QUIET);
 		list.push_back(move);
 	}
 }
 
-void FilterAndAddPawnPromoCapture(MoveSet& list, PIECE piece, COLOR col, BITPOS startPos, BITPOS endPos, PIECE capturedPiece) {
+void FilterAndAddPawnPromoCapture(MoveSet& list, PIECE piece, COLOR col, int startPosIdx, int endPosIdx, BITPOS startPos, BITPOS endPos, PIECE capturedPiece) {
 	U64 rankp = 0;
 	if (col == WHITE) {
 		rankp = U64(0xFF00000000000000);
@@ -132,17 +133,17 @@ void FilterAndAddPawnPromoCapture(MoveSet& list, PIECE piece, COLOR col, BITPOS 
 	}
 
 	if (endPos & rankp) {
-		Move qp(startPos, endPos, piece, Move::CAPTURE_PROMOTION_QUEEN, capturedPiece);
-		Move np(startPos, endPos, piece, Move::CAPTURE_PROMOTION_KNIGHT, capturedPiece);
-		Move rp(startPos, endPos, piece, Move::CAPTURE_PROMOTION_ROOK, capturedPiece);
-		Move bp(startPos, endPos, piece, Move::CAPTURE_PROMOTION_BISHOP, capturedPiece);
+		Move qp(startPosIdx, endPosIdx, piece, MOVE_FLAGS_PROMO_Q_CAP, capturedPiece);
+		Move np(startPosIdx, endPosIdx, piece, MOVE_FLAGS_PROMO_N_CAP, capturedPiece);
+		Move rp(startPosIdx, endPosIdx, piece, MOVE_FLAGS_PROMO_R_CAP, capturedPiece);
+		Move bp(startPosIdx, endPosIdx, piece, MOVE_FLAGS_PROMO_B_CAP, capturedPiece);
 		list.push_back(qp);
 		list.push_back(np);
 		list.push_back(rp);
 		list.push_back(bp);
 	}
 	else {
-		Move move(startPos, endPos, piece, Move::CAPTURE, capturedPiece);
+		Move move(startPosIdx, endPosIdx, piece, MOVE_FLAGS_CAPTURE, capturedPiece);
 		list.push_back(move);
 	}
 }
@@ -157,16 +158,19 @@ void GenPawnPushes(MoveSet& list, const State& state, PIECE piece, COLOR col) {
 	U64 dblEndPoses = (col == WHITE ? (wDblPushTargets(pawns, empty)) : (bDblPushTargets(pawns, empty)));
 
 	while (singleEndPoses) {
-		U64 endPos = 1ULL << bitB_bitScanForward(singleEndPoses);
+		int endPosIdx = bitB_bitScanForward(singleEndPoses);
+		U64 endPos = 1ULL << endPosIdx;
 		U64 startPos = (col == WHITE ? bitB_soutOne(endPos): bitB_nortOne(endPos));
+		int startPosIdx = bitB_bitScanForward(startPos);
 
-		FilterAndAddPawnPromoPush(list, piece, col, (BITPOS)startPos, (BITPOS)endPos);
+		FilterAndAddPawnPromoPush(list, piece, col, startPosIdx, endPosIdx, (BITPOS)startPos, (BITPOS)endPos);
 
 		singleEndPoses ^= endPos;
 	}
 
 	while (dblEndPoses) {
-		U64 endPos = 1ULL << bitB_bitScanForward(dblEndPoses);
+		int endPosIdx = bitB_bitScanForward(dblEndPoses);
+		U64 endPos = 1ULL << endPosIdx;
 		U64 startPos = (col == WHITE ? endPos >> 16 : endPos << 16);
 
 		Move m((BITPOS)startPos, (BITPOS)endPos, piece, Move::PAWN_DOUBLE_PUSH);
@@ -187,13 +191,14 @@ void GenPawnAttacks(MoveSet& list, const State& state, PIECE piece, COLOR col) {
 		U64 endPoses = arrPawnAttacks[col][stPosIdx];
 
 		while (endPoses) {
-			U64 endPos = 1ULL << bitB_bitScanForward(endPoses);
+			int endPosIdx = bitB_bitScanForward(endPoses);
+			U64 endPos = 1ULL << endPosIdx;
 
 			if (col == WHITE) {
 				for (int i = 6; i < 12; i++) {
 					if (CheckFlag(state.pieceBB[i], endPos)) {
 						PIECE capP = (PIECE)i;
-						FilterAndAddPawnPromoCapture(list, piece, col, (BITPOS)startPos, (BITPOS)endPos, capP);
+						FilterAndAddPawnPromoCapture(list, piece, col, stPosIdx, endPosIdx, (BITPOS)startPos, (BITPOS)endPos, capP);
 						break;
 					}
 				}
@@ -202,7 +207,7 @@ void GenPawnAttacks(MoveSet& list, const State& state, PIECE piece, COLOR col) {
 				for (int i = 0; i < 6; i++) {
 					if (CheckFlag(state.pieceBB[i], endPos)) {
 						PIECE capP = (PIECE)i;
-						FilterAndAddPawnPromoCapture(list, piece, col, (BITPOS)startPos, (BITPOS)endPos, capP);
+						FilterAndAddPawnPromoCapture(list, piece, col, stPosIdx, endPosIdx, (BITPOS)startPos, (BITPOS)endPos, capP);
 						break;
 					}
 				}
@@ -254,19 +259,19 @@ void GenPawnMoves(MoveSet& list, const State& state, const Move& lastOpponentMov
 #pragma endregion
 //################## PAWN STUFF END ###########################
 
-inline void AddMoves(MoveSet& list, const State& state, PIECE piece, COLOR col, U64 startPos, U64 endMovePoses) {
+inline void AddMoves(MoveSet& list, const State& state, PIECE piece, COLOR col, int startPosIdx, U64 startPos, U64 endMovePoses) {
 	while (endMovePoses) {
 		int ePosIdx = bitB_bitScanForward(endMovePoses);
 		U64 endPos = 1ULL << ePosIdx;
 
-		Move mv((BITPOS)startPos, (BITPOS)endPos, piece, Move::QUIET);
+		Move mv(startPosIdx, ePosIdx, piece, MOVE_FLAGS_QUIET);
 		list.push_back(mv);
 
 		endMovePoses ^= endPos;
 	}
 }
 
-inline void AddCaps(MoveSet& list, const State& state, PIECE piece, COLOR col, U64 startPos, U64 endCapPoses) {
+inline void AddCaps(MoveSet& list, const State& state, PIECE piece, COLOR col, int startPosIdx, U64 startPos, U64 endCapPoses) {
 	while (endCapPoses) {
 		int ePosIdx = bitB_bitScanForward(endCapPoses);
 		U64 endPos = 1ULL << ePosIdx;
@@ -277,7 +282,7 @@ inline void AddCaps(MoveSet& list, const State& state, PIECE piece, COLOR col, U
 		for (int i = min; i < max; i++) {
 			if (CheckFlag(state.pieceBB[i], endPos)) {
 				PIECE capP = (PIECE)i;
-				Move mv((BITPOS)startPos, (BITPOS)endPos, piece, Move::CAPTURE, capP);
+				Move mv(startPosIdx, ePosIdx, piece, MOVE_FLAGS_CAPTURE, capP);
 				list.push_back(mv);
 				break;
 			}
@@ -297,10 +302,10 @@ void GenKnightMoves(MoveSet& list, const State& state) {
 		U64 knightMoves = arrKnightMoves[sPosIdx];
 		
 		U64 endMovePoses = knightMoves & state.emptyBB;
-		AddMoves(list, state, p, col, startPos, endMovePoses);
+		AddMoves(list, state, p, col, sPosIdx, startPos, endMovePoses);
 
 		U64 endCapPoses = knightMoves & state.colorBB[!col];
-		AddCaps(list, state, p, col, startPos, endCapPoses);
+		AddCaps(list, state, p, col, sPosIdx, startPos, endCapPoses);
 
 		startPoses ^= startPos;
 	}
@@ -355,10 +360,10 @@ void GenKingMoves(MoveSet& list, const State& state, U64 dangerSquares) {
 		U64 kingMoves = arrKingMoves[sPosIdx];
 
 		U64 endMovePoses = kingMoves & state.emptyBB & (~dangerSquares);
-		AddMoves(list, state, p, col, startPos, endMovePoses);
+		AddMoves(list, state, p, col, sPosIdx, startPos, endMovePoses);
 
 		U64 endCapPoses = kingMoves & state.colorBB[!col];
-		AddCaps(list, state, p, col, startPos, endCapPoses);
+		AddCaps(list, state, p, col, sPosIdx, startPos, endCapPoses);
 
 		startPoses ^= startPos;
 	}
@@ -383,10 +388,10 @@ void GenRookMoves(MoveSet& list, const State& state) {
 		U64 endPoses = slideGen->RookAttacks(occupied, sPosIdx) & (empty | enemyPieces);
 
 		U64 endMovePoses = endPoses & empty;
-		AddMoves(list, state, p, col, startPos, endMovePoses);
+		AddMoves(list, state, p, col, sPosIdx, startPos, endMovePoses);
 
 		U64 endCapPoses = endPoses & enemyPieces;
-		AddCaps(list, state, p, col, startPos, endCapPoses);
+		AddCaps(list, state, p, col, sPosIdx, startPos, endCapPoses);
 
 		startPoses ^= startPos;
 	}
@@ -409,10 +414,10 @@ void GenBishopMoves(MoveSet& list, const State& state) {
 		U64 endPoses = slideGen->BishopAttacks(occupied, sPosIdx) & (empty | enemyPieces);
 
 		U64 endMovePoses = endPoses & empty;
-		AddMoves(list, state, p, col, startPos, endMovePoses);
+		AddMoves(list, state, p, col, sPosIdx, startPos, endMovePoses);
 
 		U64 endCapPoses = endPoses & enemyPieces;
-		AddCaps(list, state, p, col, startPos, endCapPoses);
+		AddCaps(list, state, p, col, sPosIdx, startPos, endCapPoses);
 
 		startPoses ^= startPos;
 	}
@@ -434,10 +439,10 @@ void GenQueenMoves(MoveSet& list, const State& state) {
 		U64 endPoses = slideGen->QueenAttacks(occupied, sPosIdx) & (empty | enemyPieces);
 
 		U64 endMovePoses = endPoses & empty;
-		AddMoves(list, state, p, col, startPos, endMovePoses);
+		AddMoves(list, state, p, col, sPosIdx, startPos, endMovePoses);
 
 		U64 endCapPoses = endPoses & enemyPieces;
-		AddCaps(list, state, p, col, startPos, endCapPoses);
+		AddCaps(list, state, p, col, sPosIdx, startPos, endCapPoses);
 
 		startPoses ^= startPos;
 	}
