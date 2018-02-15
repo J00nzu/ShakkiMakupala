@@ -5,6 +5,7 @@
 #include "move.h"
 #include "flagmanip.h"
 #include <functional>
+#include "hash.h"
 
 
 #define STATE_H_TURN_WHITE						0b00000001U
@@ -19,6 +20,7 @@ struct State {
 	U64 occupiedBB;
 	U64 emptyBB;
 	uint_fast32_t flags;
+	StateHash hash;
 
 	State advanceTurn(const Move& move) const;
 
@@ -100,17 +102,5 @@ struct State {
 			return false;
 		}
 		return true;
-	}
-
-
-	inline size_t hash() const{
-		size_t hash = 0;
-		for (int i = 0; i < 12; i++) {
-			size_t h = std::hash<uint64_t>{}(pieceBB[i]);
-			hash ^= _rotl64(h, 1);
-		}
-		size_t fh = std::hash<uint32_t>{}(flags);
-		hash ^= fh;
-		return hash;
 	}
 };
