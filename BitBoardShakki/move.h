@@ -78,6 +78,9 @@ public:
 
 	BITPOS getFromBB() const;
 	BITPOS getToBB() const;
+	int getFromIdx() const;
+	int getToIdx() const;
+	int getEpSquareIdx() const;
 	PIECE getPiece() const;
 	PIECE getCPiece() const;
 	COLOR getColor() const;

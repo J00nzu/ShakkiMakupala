@@ -5,8 +5,7 @@
 using namespace std;
 
 Move HumanPlayer::askMove(const Game& game, const State& state, COLOR col) {
-	auto allPossibleMoves = MoveGenerator::getInstance().GenLegalMoves(state,
-		game.getMoveHistory()->empty() ? Move() : game.getMoveHistory()->back());
+	auto allPossibleMoves = MoveGenerator::getInstance().GenLegalMoves(state);
 	if (allPossibleMoves.empty()) {
 		Move noMoves;
 		return noMoves;

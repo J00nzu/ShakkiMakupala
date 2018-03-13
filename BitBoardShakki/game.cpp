@@ -16,12 +16,13 @@ const std::vector<Move>* Game::getMoveHistory() const {
 
 GameRecording Game::Play(bool drawUI) {
 	State currentState = State::initialize();
+	Move lastMove;
 	Move move;
 	while (true) {
 		_state_history.push_back(currentState);
 
 		if (drawUI) {
-			UI::singleton->drawBoard(currentState);
+			UI::singleton->drawBoard(currentState, lastMove);
 		}
 
 		if (currentState.getTurnColor() == WHITE) {
@@ -53,10 +54,13 @@ GameRecording Game::Play(bool drawUI) {
 		else {
 			_pblack->opponentMoveMade(*this, currentState, move, WHITE);
 		}
+		lastMove = move;
 	}
 }
 
 int Game::stateOccurredTimes(const State& state) const {
+	if (_state_history.empty())
+		return 0;
 	int times = 0;
 	for each (auto st in _state_history)
 	{

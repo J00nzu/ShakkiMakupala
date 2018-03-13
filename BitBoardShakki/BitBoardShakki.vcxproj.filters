@@ -25,12 +25,12 @@
     <Filter Include="Source Files\ai">
       <UniqueIdentifier>{fa7b30c2-9b89-42a9-a077-4933b7f64302}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\core">
+      <UniqueIdentifier>{c70485a2-5909-465a-b47a-faa0158bd811}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="test.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="convert.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="move.cpp">
@@ -84,6 +84,21 @@
     <ClCompile Include="dumbai.cpp">
       <Filter>Source Files\ai</Filter>
     </ClCompile>
+    <ClCompile Include="smartAB.cpp">
+      <Filter>Source Files\ai</Filter>
+    </ClCompile>
+    <ClCompile Include="convert.cpp">
+      <Filter>Source Files\core</Filter>
+    </ClCompile>
+    <ClCompile Include="moveclock.cpp">
+      <Filter>Source Files\core</Filter>
+    </ClCompile>
+    <ClCompile Include="hash.cpp">
+      <Filter>Source Files\core</Filter>
+    </ClCompile>
+    <ClCompile Include="mapstateev.cpp">
+      <Filter>Source Files\ai</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="bitboardops.h">
@@ -129,6 +144,12 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="hash.h">
+      <Filter>Header Files\core</Filter>
+    </ClInclude>
+    <ClInclude Include="caching.h">
+      <Filter>Header Files\core</Filter>
+    </ClInclude>
+    <ClInclude Include="moveclock.h">
       <Filter>Header Files\core</Filter>
     </ClInclude>
   </ItemGroup>

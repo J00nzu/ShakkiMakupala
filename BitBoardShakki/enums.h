@@ -40,6 +40,17 @@ enum OUTCOME : int_least8_t {
 	DRAW = 0
 };
 
+enum FILEIDX : uint_least8_t {
+	FILE1 = 0,
+	FILE2,
+	FILE3,
+	FILE4,
+	FILE5,
+	FILE6,
+	FILE7,
+	FILE8,
+	NOFILE
+};
 
 enum BITPOS : U64 {
 	bH8 = 1ULL << 63,

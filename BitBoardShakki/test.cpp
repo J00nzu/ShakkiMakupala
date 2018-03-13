@@ -79,7 +79,7 @@ int main2() {
 		set.push_back(mv5);
 	}
 
-	set = MoveGenerator::getInstance().GenPseudoLegalMoves(st, Move());
+	set = MoveGenerator::getInstance().GenPseudoLegalMoves(st);
 
 	for each (Move mv in set)
 	{
@@ -96,7 +96,7 @@ int main2() {
 		if (nu.empty() || (i % 50) == 0) {
 			newState = State::initialize();
 		}
-		nu = MoveGenerator::getInstance().GenLegalMoves(newState,lastMove);
+		nu = MoveGenerator::getInstance().GenLegalMoves(newState);
 		nu.sort();
 		
 		for each (Move mv in nu)

@@ -16,7 +16,8 @@ public:
 	MoveGenerator(MoveGenerator const&) = delete;
 	void operator=(MoveGenerator const&) = delete;
 
-	MoveSet GenPseudoLegalMoves(const State& state, const Move& lastOpponentMove, U64 dangerSquares = 0)const;
-	MoveSet GenLegalMoves(const State& state, const Move& lastOpponentMove)const;
+	MoveSet GenPseudoLegalMoves(const State& state, U64 dangerSquares = 0)const;
+	MoveSet GenLegalMoves(const State& state)const;
+	U64 DangerSquares(const State& state, COLOR eCol) const;
 
 };

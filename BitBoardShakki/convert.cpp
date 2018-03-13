@@ -53,32 +53,32 @@ std::wstring bitPosToStr(BITPOS pos) {
 	int rank = bitP_getRank(pos);
 
 	int rem = idx % 8;
-	wchar_t file = L'A';
+	wchar_t file = L'a';
 	switch (rem)
 	{
 	case 0:
-		file = L'A';
+		file = L'a';
 		break;
 	case 1:
-		file = L'B';
+		file = L'b';
 		break;
 	case 2:
-		file = L'C';
+		file = L'c';
 		break;
 	case 3:
-		file = L'D';
+		file = L'd';
 		break;
 	case 4:
-		file = L'E';
+		file = L'e';
 		break;
 	case 5:
-		file = L'F';
+		file = L'f';
 		break;
 	case 6:
-		file = L'G';
+		file = L'g';
 		break;
 	case 7:
-		file = L'H';
+		file = L'h';
 		break;
 	default:
 		break;
@@ -157,7 +157,6 @@ bool strToMove(const std::wstring& string, Move &move, COLOR col) {
 		if (!strToPos(string.substr(3), endPos)) {
 			return false;
 		}
-		PIECE promop;
 		switch (string.c_str()[5]) {
 		case L'Q':
 			if (col == WHITE) {
@@ -232,7 +231,7 @@ wchar_t pieceToChar(PIECE piece) {
 		return L'K';
 		break;
 	case Wpawn:
-		return L'P';
+		return L' ';
 		break;
 	case Brook:
 		return L'R';
@@ -250,7 +249,7 @@ wchar_t pieceToChar(PIECE piece) {
 		return L'K';
 		break;
 	case Bpawn:
-		return L'P';
+		return L' ';
 		break;
 	default:
 		return L' ';

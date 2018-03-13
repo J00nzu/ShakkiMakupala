@@ -131,6 +131,26 @@ BITPOS Move::getToBB() const {
 	auto i =(m_Move >> 6) & mask;
 	return (BITPOS)(1ULL << i);
 }
+
+int Move::getFromIdx() const {
+	const unsigned int mask = 0x3f;
+	auto i = m_Move & mask;
+	return i;
+}
+
+int Move::getToIdx() const {
+	const unsigned int mask = 0x3f;
+	auto i = (m_Move >> 6) & mask;
+	return i;
+}
+
+int Move::getEpSquareIdx() const {
+	COLOR col = getColor();
+	int mIdx = getToIdx();
+	int capIdx = (col == WHITE ? mIdx - 8 : mIdx + 8);
+	return capIdx;
+}
+
 PIECE Move::getPiece() const {
 	const unsigned int mask = 0xf;
 	auto i = (m_Move >> 12) & mask;
@@ -203,12 +223,12 @@ unsigned int Move::getFlags()  const {
 	return i;
 }
 bool Move::isCapture() const {
-	auto flags = getFlags();
-	return CheckFlag(flags, MOVE_FLAGS_CAPTURE);
+	const uint32_t cap = MOVE_FLAGS_CAPTURE << 20;
+	return CheckFlag(m_Move, cap);
 }
 bool Move::isPromotion() const {
-	auto flags = getFlags();
-	return CheckFlag(flags, MOVE_FLAGS_PROMO_N);
+	const uint32_t pro = MOVE_FLAGS_PROMO_N << 20;
+	return CheckFlag(m_Move, pro);
 }
 bool Move::isQuiet() const {
 	auto flags = getFlags();

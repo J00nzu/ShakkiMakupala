@@ -15,6 +15,7 @@ private:
 	std::vector<State> _state_history;
 	std::vector<Move> _move_history;
 public:
+	Game() {};
 	Game(Player* white, Player* black);
 	const std::vector<State>* getStateHistory() const;
 	const std::vector<Move>* getMoveHistory() const;

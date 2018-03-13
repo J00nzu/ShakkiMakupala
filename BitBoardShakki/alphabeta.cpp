@@ -1,12 +1,20 @@
 #include "algo.h"
 #include "movegen.h"
-#include <unordered_map>
 #include <queue>
 #include <thread>
 #include <mutex>
+#include <shared_mutex>
+#include "convert.h"
+#include <iostream>
+#include <sstream>
+#include "caching.h"
 
-
+#ifdef _DEBUG
 #define NUM_DEPTH 5
+#else
+#define NUM_DEPTH 5
+#endif // _DEBUG
+
 
 struct AlphaBetaReturn { 
 	int eval = 0;
@@ -31,17 +39,16 @@ struct AlphaBetaReturn {
 	}
 };
 
+static std::mutex queueMutex;
+static std::queue<AlphaBetaReturn*> workQueue;
 
-MoveSet& getMoves(const State& state, const Move& lastOpponentMove) {
+static MoveSet getMoves(const State& state) {
 	static const MoveGenerator* moveGen = &MoveGenerator::getInstance();
 
-	MoveSet moves = moveGen->GenPseudoLegalMoves(state, lastOpponentMove);
+	MoveSet moves = moveGen->GenPseudoLegalMoves(state);
 	moves.sort();
 	return moves;
 }
-
-std::mutex queueMutex;
-std::queue<AlphaBetaReturn*> workQueue;
 
 
 /*
@@ -70,37 +77,55 @@ int alphaBetaMin(int alpha, int beta, int depthleft) {
 }
 */
 
-int alphaBetaMin(int alpha, int beta, int depthleft, const State& state, const Move& lastOpponentMove, const StateEvaluator* eval, const MoveGenerator* moveGen);
+int alphaBetaMin(int alpha, int beta, int depthleft, const State& state, const StateEvaluator* eval, const MoveGenerator* moveGen);
 
-int alphaBetaMax(int alpha, int beta, int depthleft, const State& state, const Move& lastOpponentMove, const StateEvaluator* eval, const MoveGenerator* moveGen) {
-	if (state.pieceBB[Wking] == 0) return INT_MIN;
+int alphaBetaMax(int alpha, int beta, int depthleft, const State& state, const StateEvaluator* eval, const MoveGenerator* moveGen) {
+	//if (state.pieceBB[Wking] == 0) return INT_MIN;
 	if (depthleft == 0) return eval->evaluate(state);
-	auto mvs = getMoves(state, lastOpponentMove);
+	
+	/*
+	CacheItem cacheit;
+	if (checkCache(state, cacheit) && depthleft <= cacheit.depth) {
+		return cacheit.evaluation;
+	}*/
+	
+	auto mvs = getMoves(state);
 	for each(auto move in mvs) {
 		State newState = state.advanceTurn(move);
-		int score = alphaBetaMin(alpha, beta, depthleft - 1, newState, move, eval, moveGen);
+		int score = alphaBetaMin(alpha, beta, depthleft - 1, newState, eval, moveGen);
 		if (score >= beta)
 			return beta;   // fail hard beta-cutoff
 		if (score > alpha)
 			alpha = score; // alpha acts like max in MiniMax
 	}
+	
+	//addToCache(state, alpha, depthleft);
+
 	return alpha;
 }
 
-int alphaBetaMin(int alpha, int beta, int depthleft, const State& state, const Move& lastOpponentMove, const StateEvaluator* eval, const MoveGenerator* moveGen) {
-	if (state.pieceBB[Bking] == 0) return INT_MAX;
+int alphaBetaMin(int alpha, int beta, int depthleft, const State& state, const StateEvaluator* eval, const MoveGenerator* moveGen) {
+	//if (state.pieceBB[Bking] == 0) return INT_MAX;
 	if (depthleft == 0) return eval->evaluate(state);
 
-	auto mvs = getMoves(state, lastOpponentMove);
-	mvs.sort();
+	/*
+	CacheItem cacheit;
+	if (checkCache(state, cacheit) && depthleft <= cacheit.depth) {
+		return cacheit.evaluation;
+	}*/
+	
+	auto mvs = getMoves(state);
 	for each(auto move in mvs) {
 		State newState = state.advanceTurn(move);
-		int score = alphaBetaMax(alpha, beta, depthleft - 1, newState, move, eval, moveGen);
+		int score = alphaBetaMax(alpha, beta, depthleft - 1, newState, eval, moveGen);
 		if (score <= alpha)
 			return alpha; // fail hard alpha-cutoff
 		if (score < beta)
 			beta = score; // beta acts like min in MiniMax
 	}
+
+	//addToCache(state, beta, depthleft);
+
 	return beta;
 }
 
@@ -127,34 +152,40 @@ void workerThread() {
 				continue;
 			}
 
-			bool late = ((next->state->pieceBB[Wqueen] | next->state->pieceBB[Bqueen]) == 0);
-			int depth = NUM_DEPTH + ((int)late);
+			bool late = (next->state->countPieces() < 7);
+			int depth = NUM_DEPTH + ((int)late)*2;
 
 			int score;
 			if (next->state->getTurnColor() == WHITE) {
-				score = alphaBetaMin(INT_MIN, INT_MAX, depth, newState, next->move, next->evaluator, moveGen);
+				score = alphaBetaMin(INT_MIN, INT_MAX, depth, newState, next->evaluator, moveGen);
 				next->eval = score;
 			}
 			else {
-				score = alphaBetaMax(INT_MIN, INT_MAX, depth, newState, next->move, next->evaluator, moveGen);
+				score = alphaBetaMax(INT_MIN, INT_MAX, depth, newState, next->evaluator, moveGen);
 				next->eval = score;
 			}
 
+			//addToCache(newState, score, depth);
 		}
 	}
 }
+//#define SINGLE_THREADED
 
 void LaunchAndWaitWorkers() {
 	unsigned nthreads = std::thread::hardware_concurrency();
 	if (nthreads == 0) nthreads = 1;
 
+#ifdef SINGLE_THREADED
+	nthreads = 1;
+#endif
+
 	auto threads = new std::thread[nthreads];
 
-	for (int i = 0; i < nthreads; i++) {
+	for (size_t i = 0; i < nthreads; i++) {
 		threads[i] = std::thread(workerThread);
 	}
 
-	for (int i = 0; i < nthreads; i++) {
+	for (size_t i = 0; i < nthreads; i++) {
 		threads[i].join();
 	}
 
@@ -162,11 +193,28 @@ void LaunchAndWaitWorkers() {
 }
 
 
+static bool compareABRet(const AlphaBetaReturn& i, const AlphaBetaReturn& j) {
+	if(i.state->getTurnColor()==WHITE)
+		return (i.eval > j.eval); 
+	else
+		return (i.eval < j.eval);
+}
+
+static void printABRet(const AlphaBetaReturn& i) {
+	std::wcout << moveToStr(i.move);
+	std::wcout << "      ";
+	std::wcout << i.eval;
+	std::wcout << std::endl;
+}
+
+
 Move AlphaBetaAlgorithm::decideAMove(const State& state, const Game& game, const Move& lastOpponentMove, const StateEvaluator* eval) {
-	srand(0);
+	currentGen++;
+	pruneCacheOld();
+
 	std::vector<AlphaBetaReturn> returnMoves;
 	static const MoveGenerator* moveGen = &MoveGenerator::getInstance();
-	auto mvs = moveGen->GenLegalMoves(state, lastOpponentMove);
+	auto mvs = moveGen->GenLegalMoves(state);
 	if (mvs.empty()) {
 		return Move();
 	}
@@ -185,6 +233,13 @@ Move AlphaBetaAlgorithm::decideAMove(const State& state, const Game& game, const
 	}
 
 	LaunchAndWaitWorkers();
+
+	std::sort(returnMoves.begin(), returnMoves.end(), compareABRet);
+
+	for (int i = 0; i < 6; i++) {
+		if (i >= returnMoves.size()) break;
+		printABRet(returnMoves[i]);
+	}
 
 	AlphaBetaReturn* bestMove = &returnMoves[0];
 

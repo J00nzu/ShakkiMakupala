@@ -7,7 +7,6 @@
 #include <functional>
 #include "hash.h"
 
-
 #define STATE_H_TURN_WHITE						0b00000001U
 #define STATE_H_WHITE_LONG_CASTLING_ALLOWED		0b00000010U
 #define STATE_H_WHITE_SHORT_CASTLING_ALLOWED	0b00000100U
@@ -20,9 +19,11 @@ struct State {
 	U64 occupiedBB;
 	U64 emptyBB;
 	uint_fast32_t flags;
+	FILEIDX ep_file = NOFILE;
 	StateHash hash;
 
 	State advanceTurn(const Move& move) const;
+	bool inCheck() const;
 
 	void clear();
 	void rebuildBBs();
@@ -32,8 +33,9 @@ struct State {
 	static int getRank(BITPOS);
 	static State initialize();
 
-
-
+	inline int countPieces() const{
+		return bitB_popCount(occupiedBB);
+	}
 
 	inline void State::setTurnWhite() {
 		SetFlag(flags, STATE_H_TURN_WHITE);
@@ -104,3 +106,4 @@ struct State {
 		return true;
 	}
 };
+

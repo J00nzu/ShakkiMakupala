@@ -81,6 +81,16 @@ inline int bitP_getRank(BITPOS p) {
 	return 0;
 }
 
+inline FILEIDX bitP_getFileIdx(U64 p) {
+	if (p == 0) {
+		return NOFILE;
+	}
+	for (int i = 0; i < 8; i++) {
+		if (CheckFlag(files[i], p)) return (FILEIDX)i;
+	}
+	return NOFILE;
+}
+
 inline int bitB_popCount(U64 i)
 {
 #ifdef _WIN64
@@ -92,14 +102,14 @@ inline int bitB_popCount(U64 i)
 #endif
 }
 
-inline int bitB_bitScanForward(U64 i)
+__forceinline int bitB_bitScanForward(U64 i)
 {
 	unsigned long index = 0;
 	_BitScanForward64(&index, i);
 	return (int)index;
 }
 
-inline int bitB_bitScanReverse(U64 i)
+__forceinline int bitB_bitScanReverse(U64 i)
 {
 	unsigned long index = 0;
 	_BitScanReverse64(&index, i);

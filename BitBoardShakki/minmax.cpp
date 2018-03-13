@@ -45,7 +45,7 @@ int mini(int depth, const State& state, const Move& lastOpponentMove, const Stat
 int maxi(int depth, const State& state, const Move& lastOpponentMove, const StateEvaluator* eval, const MoveGenerator* moveGen) {
 	if (depth == 0) return eval->evaluate(state);
 	int max = INT_MIN;
-	auto mvs = moveGen->GenPseudoLegalMoves(state, lastOpponentMove);
+	auto mvs = moveGen->GenPseudoLegalMoves(state);
 	for each(auto move in mvs) {
 		State newState = state.advanceTurn(move);
 		int score = mini(depth - 1, newState, move, eval, moveGen);
@@ -58,7 +58,7 @@ int maxi(int depth, const State& state, const Move& lastOpponentMove, const Stat
 int mini(int depth, const State& state, const Move& lastOpponentMove, const StateEvaluator* eval, const MoveGenerator* moveGen) {
 	if (depth == 0) return eval->evaluate(state);
 	int min = INT_MAX;
-	auto mvs = moveGen->GenPseudoLegalMoves(state, lastOpponentMove);
+	auto mvs = moveGen->GenPseudoLegalMoves(state);
 	for each(auto move in mvs) {
 		State newState = state.advanceTurn(move);
 		int score = maxi(depth - 1, newState, move, eval, moveGen);
@@ -77,7 +77,7 @@ Move MinMaxAlgorithm::decideAMove(const State& state, const Game& game, const Mo
 	if (state.getTurnColor() == BLACK) {
 		bestMove.eval = INT_MAX;
 	}
-	auto mvs = moveGen->GenLegalMoves(state, lastOpponentMove);
+	auto mvs = moveGen->GenLegalMoves(state);
 	mvs.sort();
 	for each (auto move in mvs)
 	{

@@ -2,6 +2,7 @@
 #include "bitboardops.h"
 #include "magic.h"
 #include "convert.h"
+#include "ui.h"
 #include <iostream>
 
 static U64 arrKnightMoves[64];
@@ -96,6 +97,9 @@ U64 bDblPushTargets(U64 bpawns, U64 empty) {
 	U64 singlePushs = bSinglePushTargets(bpawns, empty);
 	return bitB_soutOne(singlePushs) & empty & rank5;
 }
+
+
+//TODO: PROMO STALEMATE
 
 void FilterAndAddPawnPromoPush(MoveSet& list, PIECE piece, COLOR col, int startPosIdx, int endPosIdx, BITPOS startPos, BITPOS endPos) {
 	U64 rankp = 0;
@@ -220,21 +224,23 @@ void GenPawnAttacks(MoveSet& list, const State& state, PIECE piece, COLOR col) {
 	}
 }
 
-void GenPawnEP(MoveSet& list, const State& state, PIECE piece, COLOR col, const Move& lastOpponentMove) {
-	if (lastOpponentMove.isDoublePush()) {
-		BITPOS opponentPos = lastOpponentMove.getToBB();
-		U64 availableEP = 0 | bitB_eastOne(opponentPos) | bitB_westOne(opponentPos);
+void GenPawnEP(MoveSet& list, const State& state, PIECE piece, COLOR col) {
+	if (state.ep_file != NOFILE) {
+		U64 epfile = files[state.ep_file];
+		U64 availableEP = col==WHITE?
+			(ranks[4] & (bitB_eastOne(epfile) | bitB_westOne(epfile))):
+			(ranks[3] & (bitB_eastOne(epfile) | bitB_westOne(epfile)));
 		U64 startPoses = state.pieceBB[piece] & availableEP;
 		while (startPoses) {
 			int stPosIdx = bitB_bitScanForward(startPoses);
 			U64 startPos = 1ULL << stPosIdx;
 			if (col == WHITE) {
-				U64 endPos = bitB_nortOne(opponentPos);
+				U64 endPos = (ranks[5] & epfile);
 				Move mv((BITPOS)startPos, (BITPOS)endPos, piece, Move::ENPASSANT_CAP, Bpawn);
 				list.push_back(mv);
 			}
 			else {
-				U64 endPos = bitB_soutOne(opponentPos);
+				U64 endPos = (ranks[2] & epfile);
 				Move mv((BITPOS)startPos, (BITPOS)endPos, piece, Move::ENPASSANT_CAP, Wpawn);
 				list.push_back(mv);
 			}
@@ -243,13 +249,13 @@ void GenPawnEP(MoveSet& list, const State& state, PIECE piece, COLOR col, const 
 	}
 }
 
-void GenPawnMoves(MoveSet& list, const State& state, const Move& lastOpponentMove) {
+void GenPawnMoves(MoveSet& list, const State& state) {
 	COLOR col = state.getTurnColor();
 	PIECE p = col == WHITE ? Wpawn : Bpawn;
 
 	GenPawnPushes(list, state, p, col);
 	GenPawnAttacks(list, state, p, col);
-	GenPawnEP(list, state, p, col, lastOpponentMove);
+	GenPawnEP(list, state, p, col);
 }
 
 
@@ -449,10 +455,10 @@ void GenQueenMoves(MoveSet& list, const State& state) {
 }
 
 
-MoveSet MoveGenerator::GenPseudoLegalMoves(const State& state, const Move& lastOpponentMove , U64 dangerSquares) const{
+MoveSet MoveGenerator::GenPseudoLegalMoves(const State& state, U64 dangerSquares) const{
 	MoveSet list;
 
-	GenPawnMoves(list, state, lastOpponentMove);
+	GenPawnMoves(list, state);
 	GenKnightMoves(list, state);
 	GenRookMoves(list, state);
 	GenBishopMoves(list, state);
@@ -554,7 +560,7 @@ U64 GenDangerSquaresQueen(const State& state, COLOR col, U64 occupied) {
 	return danger;
 }
 
-U64 GenDangerSquares(const State& state, COLOR eCol) {
+U64 MoveGenerator::DangerSquares(const State& state, COLOR eCol) const{
 	U64 danger = 0;
 	U64 occupied = state.occupiedBB ^ state.pieceBB[(eCol == WHITE ? Bking : Wking)];
 	danger |= GenDangerSquaresPawn(state, eCol);
@@ -569,7 +575,7 @@ U64 GenDangerSquares(const State& state, COLOR eCol) {
 
 #pragma endregion
 
-void pruneOutIllegalMoves(MoveSet& list, const State& state) {
+void pruneOutIllegalMoves(const MoveGenerator* gen, MoveSet& list, const State& state) {
 
 	int it = 0;
 
@@ -578,7 +584,7 @@ void pruneOutIllegalMoves(MoveSet& list, const State& state) {
 		bool skipIt = false;
 		auto newState = state.advanceTurn(move);
 
-		U64 dangerSquares = GenDangerSquares(newState, (COLOR)(!state.getTurnColor()));
+		U64 dangerSquares = gen->DangerSquares(newState, (COLOR)(!state.getTurnColor()));
 		U64 kingPos = newState.pieceBB[(state.getTurnColor() == WHITE ? Wking : Bking)];
 
 		if (CheckFlag(dangerSquares, kingPos)) {
@@ -592,10 +598,10 @@ void pruneOutIllegalMoves(MoveSet& list, const State& state) {
 	
 }
 
-MoveSet MoveGenerator::GenLegalMoves(const State& state, const Move& lastOpponentMove) const{
-	U64 dangerSquares = GenDangerSquares(state, (COLOR)(!state.getTurnColor()));
-	MoveSet list = GenPseudoLegalMoves(state, lastOpponentMove, dangerSquares);
-	pruneOutIllegalMoves(list, state);
+MoveSet MoveGenerator::GenLegalMoves(const State& state) const{
+	U64 dangerSquares = DangerSquares(state, (COLOR)(!state.getTurnColor()));
+	MoveSet list = GenPseudoLegalMoves(state, dangerSquares);
+	pruneOutIllegalMoves(this, list, state);
 
 	return list;
 }

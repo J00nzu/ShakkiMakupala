@@ -105,6 +105,7 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
       <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
+      <InlineFunctionExpansion>Disabled</InlineFunctionExpansion>
     </ClCompile>
     <Link>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
@@ -118,15 +119,19 @@
     <ClCompile Include="dumbai.cpp" />
     <ClCompile Include="findmagics.cpp" />
     <ClCompile Include="game.cpp" />
+    <ClCompile Include="hash.cpp" />
     <ClCompile Include="magic.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="mapstateev.cpp" />
     <ClCompile Include="minmax.cpp" />
     <ClCompile Include="move.cpp" />
+    <ClCompile Include="moveclock.cpp" />
     <ClCompile Include="movegen.cpp" />
     <ClCompile Include="moveset.cpp" />
     <ClCompile Include="piece.cpp" />
     <ClCompile Include="player.cpp" />
     <ClCompile Include="posstateev.cpp" />
+    <ClCompile Include="smartAB.cpp" />
     <ClCompile Include="state.cpp" />
     <ClCompile Include="stateev.cpp" />
     <ClCompile Include="test.cpp" />
@@ -135,6 +140,7 @@
   <ItemGroup>
     <ClInclude Include="algo.h" />
     <ClInclude Include="bitboardops.h" />
+    <ClInclude Include="caching.h" />
     <ClInclude Include="convert.h" />
     <ClInclude Include="defines.h" />
     <ClInclude Include="enums.h" />
@@ -143,6 +149,7 @@
     <ClInclude Include="hash.h" />
     <ClInclude Include="magic.h" />
     <ClInclude Include="move.h" />
+    <ClInclude Include="moveclock.h" />
     <ClInclude Include="movegen.h" />
     <ClInclude Include="piece.h" />
     <ClInclude Include="player.h" />

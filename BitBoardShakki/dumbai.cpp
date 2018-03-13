@@ -3,10 +3,10 @@
 #include <time.h>
 
 Move DumbDecisions::decideAMove(const State& state, const Game& game, const Move& lastOpponentMove, const StateEvaluator* eval) {
-	srand(time(NULL));
+	srand((unsigned int)time(NULL));
 	static const MoveGenerator* moveGen = &MoveGenerator::getInstance();
 
-	MoveSet moves = moveGen->GenLegalMoves(state, lastOpponentMove);
+	MoveSet moves = moveGen->GenLegalMoves(state);
 	moves.sort();
 	Move move;
 	if (moves.size() > 6) {

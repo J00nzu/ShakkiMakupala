@@ -1,6 +1,8 @@
-
-#include "statebb.h";
+#include "statebb.h"
+#include "ui.h"
 #include <cassert>
+#include <iostream>
+#include "movegen.h"
 
 const Piece* State::getPiece(BITPOS pos) const{
 	for (int i = 0; i < 12; i++) {
@@ -46,32 +48,36 @@ void DoCastling(State& newState, const Move& move) {
 }
 
 
-void WhiteCheckMoveKingOrRook(State& newState, const Move& move) {
-	U64 shortCastlingMask = 0x0000000000000009ULL;
-	U64 longCastlingMask =	0x0000000000000088ULL;
+inline void WhiteCheckMoveKingOrRook(State& newState, const Move& move) {
+	static const U64 shortCastlingMask = 0x0000000000000090ULL;
+	static const U64 longCastlingMask =	 0x0000000000000088ULL;
 
 	U64 fromBB = move.getFromBB();
 	U64 toBB = move.getToBB();
 	U64 fromToBB = fromBB ^ toBB;
 
-	if (fromToBB | shortCastlingMask) {
+	if (newState.getWhiteShortCastlingAllowed() && CheckFlag(shortCastlingMask, fromToBB)) {
+		newState.hash.unsetCastlingRights(zobhash::W_K_CASTLE);
 		newState.unSetWhiteShortCastlingAllowed();
-	}if (fromToBB | longCastlingMask) {
+	}if (newState.getWhiteLongCastlingAllowed() && CheckFlag(longCastlingMask, fromToBB)) {
+		newState.hash.unsetCastlingRights(zobhash::W_Q_CASTLE);
 		newState.unSetWhiteLongCastlingAllowed();
 	}
 }
 
-void BlackCheckMoveKingOrRook(State& newState, const Move& move) {
-	U64 shortCastlingMask = 0x0900000000000000ULL;
-	U64 longCastlingMask =	0x8800000000000000ULL;
+inline void BlackCheckMoveKingOrRook(State& newState, const Move& move) {
+	static const U64 shortCastlingMask = 0x9000000000000000ULL;
+	static const U64 longCastlingMask =	0x8800000000000000ULL;
 
 	U64 fromBB = move.getFromBB();
 	U64 toBB = move.getToBB();
 	U64 fromToBB = fromBB ^ toBB;
 
-	if (fromToBB | shortCastlingMask) {
+	if (newState.getBlackShortCastlingAllowed() && CheckFlag(shortCastlingMask, fromToBB)) {
+		newState.hash.unsetCastlingRights(zobhash::B_K_CASTLE);
 		newState.unSetBlackShortCastlingAllowed();
-	}if (fromToBB | longCastlingMask) {
+	}if (newState.getBlackLongCastlingAllowed() && CheckFlag(longCastlingMask, fromToBB)) {
+		newState.hash.unsetCastlingRights(zobhash::B_Q_CASTLE);
 		newState.unSetBlackLongCastlingAllowed();
 	}
 }
@@ -99,6 +105,10 @@ void DoEnPassant(State& newState, const Move& move) {
 State State::advanceTurn(const Move& move) const{
 	State newState(*this);
 	newState.switchTurn();
+	if (newState.ep_file != NOFILE) {
+		newState.hash.switchEpFile(ep_file);
+		newState.ep_file = NOFILE;
+	}
 
 	Move::MoveType type = move.getMoveType();
 
@@ -107,6 +117,10 @@ State State::advanceTurn(const Move& move) const{
 	}
 	if (getWhiteLongCastlingAllowed() || getWhiteShortCastlingAllowed()) {
 		WhiteCheckMoveKingOrRook(newState, move);
+	}
+	if (type == Move::PAWN_DOUBLE_PUSH) {
+		newState.ep_file = bitP_getFileIdx(move.getFromBB());
+		newState.hash.switchEpFile(newState.ep_file);
 	}
 
 	if (type == Move::KING_CASTLE || type == Move::QUEEN_CASTLE) {
@@ -170,19 +184,37 @@ State State::advanceTurn(const Move& move) const{
 		newState.emptyBB ^= fromToBB;   // ... and empty bitboard
 	}
 
+	newState.hash.update(newState, move);
+
 #ifdef _DEBUG //check if all the collection boards are updating correctly
 	U64 lempty = newState.emptyBB;
 	U64 loccupied = newState.occupiedBB;
 	U64 lwhite = newState.colorBB[WHITE];
 	U64 lblack = newState.colorBB[BLACK];
 	newState.rebuildBBs();
+	if ((lempty != newState.emptyBB) || (loccupied != newState.occupiedBB) || (lwhite != newState.colorBB[WHITE]) || (lblack != newState.colorBB[BLACK])) {
+		UI::singleton->drawBoard(*this);
+		UI::singleton->drawBoard(newState, move);
+	}
 	assert(lempty == newState.emptyBB);
 	assert(loccupied == newState.occupiedBB);
 	assert(lwhite == newState.colorBB[WHITE]);
 	assert(lblack == newState.colorBB[BLACK]);
+
 #endif 
 	return newState;
 }
+
+bool State::inCheck() const {
+	U64 threats = MoveGenerator::getInstance().DangerSquares(*this, (COLOR)(!getTurnColor()));
+	if (getTurnColor() == WHITE) {
+		return CheckFlag(threats, pieceBB[Wking]);
+	}
+	else {
+		return CheckFlag(threats, pieceBB[Bking]);
+	}
+}
+
 
 void State::clear() {
 	flags = 0;
@@ -218,6 +250,9 @@ State State::initialize() {
 	state.setWhiteLongCastlingAllowed();
 
 	state.setTurnWhite();
+
+	state.ep_file = NOFILE;
+	state.hash.reconstruct(state);
 
 	return state;
 }
