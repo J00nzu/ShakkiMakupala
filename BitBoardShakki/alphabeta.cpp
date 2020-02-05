@@ -10,9 +10,9 @@
 #include "caching.h"
 
 #ifdef _DEBUG
-#define NUM_DEPTH 5
+#define NUM_DEPTH 4
 #else
-#define NUM_DEPTH 5
+#define NUM_DEPTH 6
 #endif // _DEBUG
 
 
@@ -77,42 +77,106 @@ int alphaBetaMin(int alpha, int beta, int depthleft) {
 }
 */
 
-int alphaBetaMin(int alpha, int beta, int depthleft, const State& state, const StateEvaluator* eval, const MoveGenerator* moveGen);
+static int evaluateForMovingSide(const State& state, const StateEvaluator* eval) {
+	if (state.getTurnColor() == WHITE) {
+		return eval->evaluate(state);
+	}
+	else {
+		return -eval->evaluate(state);
+	}
+}
 
-int alphaBetaMax(int alpha, int beta, int depthleft, const State& state, const StateEvaluator* eval, const MoveGenerator* moveGen) {
-	//if (state.pieceBB[Wking] == 0) return INT_MIN;
-	if (depthleft == 0) return eval->evaluate(state);
-	
-	/*
-	CacheItem cacheit;
-	if (checkCache(state, cacheit) && depthleft <= cacheit.depth) {
-		return cacheit.evaluation;
-	}*/
-	
+static int quiesce(int alpha, int beta, const State& state, const StateEvaluator* eval) {
+	int stand_pat = evaluateForMovingSide(state, eval);
+
+	if (stand_pat >= beta)
+		return beta;
+	if (alpha < stand_pat)
+		alpha = stand_pat;
+
 	auto mvs = getMoves(state);
 	for each(auto move in mvs) {
+		if (!move.isCapture()) {
+			continue;
+		}
 		State newState = state.advanceTurn(move);
-		int score = alphaBetaMin(alpha, beta, depthleft - 1, newState, eval, moveGen);
-		if (score >= beta)
-			return beta;   // fail hard beta-cutoff
-		if (score > alpha)
-			alpha = score; // alpha acts like max in MiniMax
-	}
-	
-	//addToCache(state, alpha, depthleft);
+		int score = -quiesce(-beta, -alpha, newState, eval);
 
+		if (score >= beta)
+			return beta;
+		if (score > alpha)
+			alpha = score;
+	}
 	return alpha;
 }
 
+
+static int alphaBeta(int alpha, int beta, int depthleft, const State& state, const StateEvaluator* eval, const MoveGenerator* moveGen) {
+	//if (state.pieceBB[Wking] == 0) return INT_MIN;
+	if (depthleft == 0) return quiesce(alpha, beta, state, eval);
+	if (state.pieceBB[(state.getTurnColor() == WHITE ? Wking : Bking)] == 0) {
+		return -999999 - depthleft;
+	}
+	
+	CacheItem cacheit;
+	// if (checkCache(state, cacheit) && depthleft <= cacheit.depth) {
+	if (false) {
+		/*
+		if (cacheit.type == CacheItem::EXACT_VALUE) // stored value is exact
+			return cacheit.evaluation;
+		if (cacheit.type == CacheItem::LOWERBOUND && cacheit.evaluation > alpha)
+			alpha = cacheit.evaluation; // update lowerbound alpha if needed
+		else if (cacheit.type == CacheItem::UPPERBOUND && cacheit.evaluation < beta)
+			beta = cacheit.evaluation; // update upperbound beta if needed
+		if (alpha >= beta)
+			return cacheit.evaluation; // if lowerbound surpasses upperbound
+
+		Move move = cacheit.bestMove;
+		State newState = state.advanceTurn(move);
+		int score = -alphaBeta(-beta, -alpha, depthleft - 1, newState, eval, moveGen);
+
+		return score;*/ return 0;
+	}
+	else {
+		int best = INT_MIN + 1;
+		Move bestMove;
+
+		auto mvs = getMoves(state);
+		for each(auto move in mvs) {
+			State newState = state.advanceTurn(move);
+			int score = -alphaBeta(-beta, -alpha, depthleft - 1, newState, eval, moveGen);
+			if (score > best) {
+				bestMove = move;
+				best = score;
+			}
+			if (best > alpha)
+				alpha = best;
+			if (best >= beta) {
+				break;
+			}
+		}
+		/*
+		if (best <= alpha) // a lowerbound value
+			//StoreTTEntry(board.getHashKey(), best, LOWERBOUND, depth);
+			addToCache(state, best, depthleft, CacheItem::LOWERBOUND, bestMove);
+		else if (best >= beta) // an upperbound value
+			//StoreTTEntry(board.getHashKey(), best, UPPERBOUND, depth);
+			addToCache(state, best, depthleft, CacheItem::UPPERBOUND, bestMove);
+		else // a true minimax value
+			 //StoreTTEntry(board.getHashKey(), best, EXACT, depth);
+			addToCache(state, best, depthleft, CacheItem::EXACT_VALUE, bestMove);
+			*/
+		return best;
+	}
+}
+
+
+/*
 int alphaBetaMin(int alpha, int beta, int depthleft, const State& state, const StateEvaluator* eval, const MoveGenerator* moveGen) {
 	//if (state.pieceBB[Bking] == 0) return INT_MAX;
 	if (depthleft == 0) return eval->evaluate(state);
 
-	/*
-	CacheItem cacheit;
-	if (checkCache(state, cacheit) && depthleft <= cacheit.depth) {
-		return cacheit.evaluation;
-	}*/
+
 	
 	auto mvs = getMoves(state);
 	for each(auto move in mvs) {
@@ -127,7 +191,7 @@ int alphaBetaMin(int alpha, int beta, int depthleft, const State& state, const S
 	//addToCache(state, beta, depthleft);
 
 	return beta;
-}
+}*/
 
 
 
@@ -153,19 +217,14 @@ void workerThread() {
 			}
 
 			bool late = (next->state->countPieces() < 7);
-			int depth = NUM_DEPTH + ((int)late)*2;
+			bool queens = ((next->state->pieceBB[Wqueen] | next->state->pieceBB[Bqueen]) != 0);
+			int depth = NUM_DEPTH + ((int)late)*2 - ((int)queens);
 
 			int score;
-			if (next->state->getTurnColor() == WHITE) {
-				score = alphaBetaMin(INT_MIN, INT_MAX, depth, newState, next->evaluator, moveGen);
-				next->eval = score;
-			}
-			else {
-				score = alphaBetaMax(INT_MIN, INT_MAX, depth, newState, next->evaluator, moveGen);
-				next->eval = score;
-			}
+			score = -alphaBeta(-INT_MAX, INT_MAX, depth-1, newState, next->evaluator, moveGen);
+			next->eval = score;
 
-			//addToCache(newState, score, depth);
+			addToCache(newState, score, depth - 1, CacheItem::EXACT_VALUE);
 		}
 	}
 }
@@ -194,10 +253,7 @@ void LaunchAndWaitWorkers() {
 
 
 static bool compareABRet(const AlphaBetaReturn& i, const AlphaBetaReturn& j) {
-	if(i.state->getTurnColor()==WHITE)
-		return (i.eval > j.eval); 
-	else
-		return (i.eval < j.eval);
+	return (i.eval > j.eval);
 }
 
 static void printABRet(const AlphaBetaReturn& i) {
@@ -236,27 +292,13 @@ Move AlphaBetaAlgorithm::decideAMove(const State& state, const Game& game, const
 
 	std::sort(returnMoves.begin(), returnMoves.end(), compareABRet);
 
-	for (int i = 0; i < 6; i++) {
+	for (int i = 0; i < 10; i++) {
 		if (i >= returnMoves.size()) break;
 		printABRet(returnMoves[i]);
 	}
 
 	AlphaBetaReturn* bestMove = &returnMoves[0];
 
-	for (int i = 1; i < returnMoves.size();i++) {
-		AlphaBetaReturn& ret = returnMoves[i];
-		int score = ret.eval;
-		if (state.getTurnColor() == WHITE) {
-			if (score > bestMove->eval) {
-				bestMove = &ret;
-			}
-		}
-		else {
-			if (score < bestMove->eval) {
-				bestMove = &ret;
-			}
-		}
-	}
 
 	return bestMove->move;
 }

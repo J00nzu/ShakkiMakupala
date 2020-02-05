@@ -50,7 +50,7 @@ void DoCastling(State& newState, const Move& move) {
 
 inline void WhiteCheckMoveKingOrRook(State& newState, const Move& move) {
 	static const U64 shortCastlingMask = 0x0000000000000090ULL;
-	static const U64 longCastlingMask =	 0x0000000000000088ULL;
+	static const U64 longCastlingMask =	 0x0000000000000011ULL;
 
 	U64 fromBB = move.getFromBB();
 	U64 toBB = move.getToBB();
@@ -67,7 +67,7 @@ inline void WhiteCheckMoveKingOrRook(State& newState, const Move& move) {
 
 inline void BlackCheckMoveKingOrRook(State& newState, const Move& move) {
 	static const U64 shortCastlingMask = 0x9000000000000000ULL;
-	static const U64 longCastlingMask =	0x8800000000000000ULL;
+	static const U64 longCastlingMask =	 0x1100000000000000ULL;
 
 	U64 fromBB = move.getFromBB();
 	U64 toBB = move.getToBB();

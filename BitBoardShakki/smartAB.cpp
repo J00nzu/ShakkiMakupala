@@ -42,7 +42,7 @@ static MoveSet getMoves(const State& state, int depth = 1) {
 	return moves;
 }
 
-int evaluateForMovingSide(const State& state, const StateEvaluator* eval) {
+static int evaluateForMovingSide(const State& state, const StateEvaluator* eval) {
 	if (state.getTurnColor() == WHITE) {
 		return eval->evaluate(state);
 	}
@@ -51,7 +51,7 @@ int evaluateForMovingSide(const State& state, const StateEvaluator* eval) {
 	}
 }
 
-int quiesce(int alpha, int beta, const State& state, const StateEvaluator* eval) {
+static int quiesce(int alpha, int beta, const State& state, const StateEvaluator* eval) {
 	int stand_pat = evaluateForMovingSide(state, eval);
 	//test
 	return stand_pat;
@@ -90,7 +90,7 @@ int reduceExtend(int depth, const Move& move, const State& state) {
 	return -1;
 }
 
-int alphaBeta(int alpha, int beta, int depthleft, int depth, int maxdepth, int* depthReached, int* positionsEvaluated, int* cacheHits, const State& state, const StateEvaluator* eval, const ThreadProcessingClock* clock) {
+static int alphaBeta(int alpha, int beta, int depthleft, int depth, int maxdepth, int* depthReached, int* positionsEvaluated, int* cacheHits, const State& state, const StateEvaluator* eval, const ThreadProcessingClock* clock) {
 	if (depth > *depthReached) *depthReached = depth;
 	(*positionsEvaluated)++;
 	if (state.pieceBB[(state.getTurnColor() == WHITE ? Wking : Bking)] == 0) {

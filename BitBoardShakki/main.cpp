@@ -18,10 +18,12 @@ int main() {
 	DecisionAlgorithm* dumbai = new DumbDecisions();
 	DecisionAlgorithm* smart = new SmartAlphaBeta(MoveClock(10));
 
-	//Player* p1 = new HumanPlayer();
-	Player* p1 = new AIPlayer(mapEv, alphabeta);
-	Player* p2 = new AIPlayer(posStateEv, alphabeta);
 
+
+	Player* p1 = new HumanPlayer();
+	//Player* p2 = new HumanPlayer();
+	Player* p2 = new AIPlayer(mapEv, alphabeta);
+	//Player* p2 = new AIPlayer(posStateEv, minmax);
 
 
 	Game game(p1, p2);
